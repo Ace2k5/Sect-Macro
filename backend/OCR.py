@@ -19,7 +19,7 @@ class OCR():
 
     def ocrMatch(self):
         img_folder = Path("Sect/Images")
-        text = pytesseract.image_to_string(Image.open(f'{img_folder}/OCR_TEST.jpg'), lang="eng")
+        text = pytesseract.image_to_string(Image.open(f'{img_folder}/OCR_TEST.jpg'), lang="eng") # THIS IS JUST A TEST
         norm_text = self.normalize(text)
         for i in self.maps:
             if (i in norm_text):
