@@ -12,6 +12,7 @@ TITLE = "Sect v0.0.1"
 class Guardians(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.game_res = initializers.resolutions.get("Roblox")
         self.mainWindow()
         self.layout = QVBoxLayout()
         self.main_widget = QWidget()
@@ -19,7 +20,6 @@ class Guardians(QMainWindow):
         self.setCentralWidget(self.main_widget)
         self.initLabels()
         self.initWindow()
-        self.game_res = initializers.resolutions.get("Roblox")
 
     def mainWindow(self):
         self.res = windows_util.resolutionMid()
@@ -36,7 +36,7 @@ class Guardians(QMainWindow):
         self.layout.addWidget(title, alignment=Qt.AlignLeft | Qt.AlignTop)
     
     def initWindow(self):
-        self.hwnd = win32gui.FindWindow(None, "Roblox")
+        self.hwnd = windows_util.initWindow("Roblox")
         self.container = QWidget(self)
         win32gui.SetParent(self.hwnd, int(self.container.winId())) # set qt window as parent application and roblox as child, so if user decides to move qt application roblox also moves
         self.layout.addWidget(self.container)
@@ -47,6 +47,7 @@ class Guardians(QMainWindow):
         game_width = self.game_res[0]
         game_height = self.game_res[1]
         self.container.setFixedSize(game_width, game_height)
-        win32gui.MoveWindow(self.hwnd, 0, 0, game_width, game_height, True) #Makes sure 800x600 is constant. Grabs x and y from rect
+        x_coord, y_coord = windows_util.resolutionMid(game_width, game_height)
+        win32gui.MoveWindow(self.hwnd, x_coord, y_coord, game_width, game_height, True) #Makes sure 800x600 is constant. Grabs x and y from rect
         self.coordinates = (self.res[0], self.res[1], self.game_res[0], self.game_res[1])
         return self.coordinates
