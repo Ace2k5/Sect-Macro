@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QMainWindow, QLabel, QWidget, QVBoxLayout, QHBoxLay
                              QPushButton)
 from PyQt5.QtGui import QPixmap
 import pyautogui
-from backend import initializers
+from backend import initializers, windows_util
 from . import guardians
 
 class MainWindow(QMainWindow):
@@ -25,10 +25,11 @@ class MainWindow(QMainWindow):
         if self.game_res is None:
             print("Game resolution not found. Problem within initializers.py ")
             return
-        self.res = self.resolution_mid()
+        self.res = windows_util.resolutionMid(self.screen_res[0], self.screen_res[1])
         self.setGeometry(self.res[0], self.res[1], (self.game_res[0] + 200), (self.game_res[1] + 100))
         self.setWindowTitle("Sect v0.0.1")
         self.setStyleSheet("background-color: #1b1b1f;")
+        windows_util.resolutionMid(self.game_res[0] + 200, self.game_res[1] + 100)
         
     def initLabels(self):
         label = QLabel("Sect")
@@ -68,10 +69,3 @@ class MainWindow(QMainWindow):
         self.new_window = guardians.Guardians()
         self.new_window.show()
         self.close()
-    
-    def resolutionMid(self):
-        screen_resolution = self.screen_res
-        x = (screen_resolution.width - 1000) // 2
-        y = (screen_resolution.height- 700) // 2
-        middle_screen = (x, y)
-        return middle_screen

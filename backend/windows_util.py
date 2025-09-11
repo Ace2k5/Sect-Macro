@@ -1,6 +1,5 @@
 import pyautogui
 import win32gui
-from frontend import guardians
 
 def initWindow(title: str):
     hwnd = win32gui.FindWindow(None, title)
