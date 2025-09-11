@@ -1,10 +1,13 @@
 from PyQt5.QtCore import (Qt, QTimer)
 from PyQt5.QtWidgets import (QMainWindow, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
                              QPushButton)
-from backend import initializers
+from backend import initializers, windows_util
 import pyautogui
 import win32con
 import win32gui
+#temporary consts
+TITLE = "Sect v0.0.1"
+
 
 class Guardians(QMainWindow):
     def __init__(self):
@@ -16,13 +19,12 @@ class Guardians(QMainWindow):
         self.setCentralWidget(self.main_widget)
         self.initLabels()
         self.initWindow()
+        self.game_res = initializers.resolutions.get("Roblox")
 
     def mainWindow(self):
-        self.screen_res = pyautogui.size()
-        self.game_res = initializers.resolutions.get("Roblox")
-        self.res = self.resolution_mid()
+        self.res = windows_util.resolutionMid()
         self.setGeometry(self.res[0], self.res[1], (self.game_res[0] + 200), (self.game_res[1] + 200))
-        self.setWindowTitle("Sect v0.0.1")
+        self.setWindowTitle(TITLE)
         self.setStyleSheet("background-color: #1b1b1f;")
 
     def initLabels(self):
@@ -36,7 +38,7 @@ class Guardians(QMainWindow):
     def initWindow(self):
         self.hwnd = win32gui.FindWindow(None, "Roblox")
         self.container = QWidget(self)
-        win32gui.SetParent(self.hwnd, int(self.container.winId()))
+        win32gui.SetParent(self.hwnd, int(self.container.winId())) # set qt window as parent application and roblox as child, so if user decides to move qt application roblox also moves
         self.layout.addWidget(self.container)
         self.initAttachWindow()
 
@@ -48,11 +50,3 @@ class Guardians(QMainWindow):
         win32gui.MoveWindow(self.hwnd, 0, 0, game_width, game_height, True) #Makes sure 800x600 is constant. Grabs x and y from rect
         self.coordinates = (self.res[0], self.res[1], self.game_res[0], self.game_res[1])
         return self.coordinates
-
-
-    def resolutionMid(self):
-        screen_resolution = self.screen_res # gets screen size from pyautogui
-        x = (screen_resolution.width - 1000) // 2 # 1000x700 since roblox is at 800x600
-        y = (screen_resolution.height- 700) // 2
-        middle_screen = (x, y)
-        return middle_screen
