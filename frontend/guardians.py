@@ -21,9 +21,9 @@ class Guardians(QMainWindow):
         self.initLabels()
         self.initWindow()
 
-
 '''We needed first the game resolution which I've set in initializers as 800x600. So we now have window height and window width for the game, but we use this as a foundation for me to extend the application for the roblox window handle.
 Then, we needed the x and y coordinates of the qt application for it to be centered, and so we called upon resolutionMid which took in the parameters of window_width and window_height and returned the position of a centered window via floor division.'''
+
     def mainWindow(self):
         self.game_res = initializers.resolutions.get("Roblox")
         if self.game_res is None:
