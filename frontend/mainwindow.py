@@ -10,9 +10,6 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.game_res = windows_util.getWindowRes("Roblox")
-        if self.game_res is None:
-            print("Game resolution not found. Problem within initializers.py ")
-            return
         self.initMain()
         self.layout = QVBoxLayout()
         self.layout.setSpacing(1)
