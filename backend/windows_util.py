@@ -1,5 +1,6 @@
 import pyautogui
 import win32gui
+import initializers
 
 def initWindow(title: str):
     hwnd = win32gui.FindWindow(None, title)
@@ -14,3 +15,10 @@ def resolutionMid(window_width: int, window_height: int):
     y = (screen_resolution.height- window_height) // 2 # this 1000x700 is primarily for the qt application
     middle_screen = (x, y)
     return middle_screen
+
+def getWindowRes(title: str):
+    game_res = initializers.resolutions.get(title)
+    if game_res is None:
+        print(f"Critical bug in initializers, no known names as {title}")
+        return
+    return game_res
