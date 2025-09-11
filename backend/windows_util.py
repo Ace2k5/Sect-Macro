@@ -1,6 +1,6 @@
 import pyautogui
 import win32gui
-import initializers
+from . import initializers
 
 def initWindow(title: str):
     hwnd = win32gui.FindWindow(None, title)

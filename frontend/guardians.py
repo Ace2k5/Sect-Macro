@@ -13,6 +13,9 @@ class Guardians(QMainWindow):
     def __init__(self):
         super().__init__()
         self.game_res = windows_util.getWindowRes("Roblox")
+        if self.game_res is None:
+            print("Game resolution not found. Problem within initializers.py ")
+            return
         self.hwnd = windows_util.initWindow("Roblox")
         self.mainWindow()
         self.layout = QVBoxLayout()
