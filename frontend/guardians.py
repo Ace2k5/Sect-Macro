@@ -13,9 +13,6 @@ class Guardians(QMainWindow):
     def __init__(self):
         super().__init__()
         self.game_res = windows_util.getWindowRes("Roblox")
-        if self.game_res is None:
-            print("Game resolution not found. Problem within initializers.py ")
-            return
         self.hwnd = windows_util.initWindow("Roblox")
         self.mainWindow()
         self.layout = QVBoxLayout()
@@ -42,13 +39,23 @@ class Guardians(QMainWindow):
     
     def initWindow(self):
         self.container = QWidget(self)
+        current_style = win32gui.GetWindowLong(self.hwnd, win32con.GWL_STYLE)
+        new_style = current_style & ~(
+            win32con.WS_CAPTION | 
+            win32con.WS_THICKFRAME | 
+            win32con.WS_MINIMIZEBOX | 
+            win32con.WS_MAXIMIZEBOX | 
+            win32con.WS_SYSMENU
+            ) # removes title bar and border
         win32gui.SetParent(self.hwnd, int(self.container.winId())) # set qt window as parent application and roblox as child, so if user decides to move qt application roblox also moves
-        self.layout.addWidget(self.container)
+        win32gui.SetWindowLong(self.hwnd, win32con.GWL_STYLE, new_style)
+        self.layout.addWidget(self.container, alignment=Qt.AlignTop)
         self.initAttachWindow()
 
     def initAttachWindow(self):
-        win32gui.ShowWindow(self.hwnd, win32con.SW_RESTORE) #Grabs HWND and uses SW_RESTORE to prevent minimization
         game_width = self.game_res[0]
         game_height = self.game_res[1]
+        win32gui.ShowWindow(self.hwnd, win32con.SW_RESTORE) #Grabs HWND and uses SW_RESTORE to prevent minimization
+        win32gui.SetWindowPos(self.hwnd, None, 0, 0, game_width, game_height, win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED)
         self.container.setFixedSize(game_width, game_height)
         win32gui.MoveWindow(self.hwnd, 0, 0, game_width, game_height, True) #Makes sure 800x600 is constant. Grabs x and y from rect, 0 0 because now roblox handle is a child
