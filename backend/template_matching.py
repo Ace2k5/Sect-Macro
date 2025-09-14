@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import os
 from pathlib import Path
 from mss import mss
-import initializers as init
-
-folder_dir = Path("Sect/Images/game_elements")
+from . import initializers
+from frontend import guardians, mainwindow
+folder_dir = Path("Images/")
 
 class ImageProcessor():
     def __init__(self, max_thresh = 0.85):
@@ -17,10 +17,13 @@ class ImageProcessor():
         self.center_x = None
         self.center_y = None
         self._init_images()
-        self.rect = init.window_info()
 
     def _init_images(self): #Initialize grey images
         self.templates_grey = {}
+        print(f"Current working directory: {os.getcwd()}")
+        print(f"Looking for images in: {folder_dir}")
+        print(f"Absolute path: {folder_dir.absolute()}")
+        print(f"Path exists: {folder_dir.exists()}")
         stored_images = Path(folder_dir).glob('*.png') #reads every single image file saved as .png using .glob
         for image in stored_images: #loops through .png files and cv reads, if not none, store on templates_grey using filename
             filename = image.name
@@ -31,25 +34,23 @@ class ImageProcessor():
             else:
                 print("Problem in initializing images.")
 
-    def screenshot(self, region=None): #Returns gray image of the current game
-        self.rect = init.window_info() #FORCE ROBLOX ON TOP and gives window information such as res
-        while self.rect is None:
-            time.sleep(0.2)
-            self.rect = init.window_info()
-        if region is None and self.rect: #grabs region from init.window_info()
-            region = {
-                "left": self.rect[0],
-                "top": self.rect[1],
-                "width": self.rect[2] - self.rect[0],
-                "height": self.rect[3] - self.rect[1]
+    def screenshot(self, rect): #Returns gray image of the current game
+        if rect != None: #grabs region from init.window_info()
+            final_rect = {
+                "left": rect[0],
+                "top": rect[1],
+                "width": rect[2] - rect[0],
+                "height": rect[3] - rect[1]
             }
-        temp_img = self.mss.grab(region)
-
+        else:
+            print("Critical bug in template_matching, rect is None. Perhaps the game is not open.")
+        temp_img = self.mss.grab(final_rect)
         img_np = np.array(temp_img)
+        print(f"[DEBUG] Screenshot rect: {final_rect}, image shape: {img_np.shape}")
         return cv.cvtColor(img_np, cv.COLOR_BGRA2GRAY)
     
-    def template_matching(self, template_filename: str): #Returns location of what to click
-        current_gray = self.screenshot()
+    def template_matching(self, template_filename: str, rect): #Returns location of what to click
+        current_gray = self.screenshot(rect)
         template_img = self.templates_grey.get(template_filename) #uses the templates_grey dictionary to find
                                                                     #specific filename
         if template_img is not None:
@@ -60,8 +61,8 @@ class ImageProcessor():
             return False
 
         if max_val >= self.max_thresh:
-            self.center_x = max_loc[0] + (template_img.shape[1] // 2)
-            self.center_y = max_loc[1] + (template_img.shape[0] // 2)
+            self.center_x = rect[0] + max_loc[0] + (template_img.shape[1] // 2)
+            self.center_y = rect[1] + max_loc[1] + (template_img.shape[0] // 2)
             print(f"Found values: X = {self.center_x}, Y = {self.center_y} with confidence level of {max_val}")
             location = (self.center_x, self.center_y)
             return location

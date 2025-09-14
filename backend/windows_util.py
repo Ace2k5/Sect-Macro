@@ -1,6 +1,8 @@
 import pyautogui
 import win32gui
 from . import initializers
+import win32con
+import win32gui
 
 def initWindow(title: str):
     hwnd = win32gui.FindWindow(None, title)
@@ -25,3 +27,33 @@ def getWindowRes(title: str):
         print(f"Critical bug in initializers, no known names as {title} or {title} is not open yet.")
         return
     return game_res
+
+def initattachWindow(hwnd, container): # attaches roblox window to qt application
+        current_style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
+        new_style = current_style & ~(
+            win32con.WS_CAPTION | 
+            win32con.WS_THICKFRAME | 
+            win32con.WS_MINIMIZEBOX | 
+            win32con.WS_MAXIMIZEBOX | 
+            win32con.WS_SYSMENU
+            ) # removes title bar and border
+        win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, new_style)
+        win32gui.SetParent(hwnd, int(container.winId())) # set qt window as parent application and roblox as child, so if user decides to move qt application roblox also moves
+        win32gui.ShowWindow(hwnd, win32con.SW_RESTORE) #Grabs HWND and uses SW_RESTORE to prevent minimization
+        win32gui.SetWindowPos(hwnd, None, 0, 0, initializers.width, initializers.height, win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED)
+        return container
+    
+def removeParent(hwnd): # removes parent qt, restore bars and headers, roblox returns to the middle of the screen via resolutionMid()
+    width, height = resolutionMid(initializers.width, initializers.height)
+    win32gui.SetParent(hwnd, None)
+    current_style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
+    new_style = current_style | (
+        win32con.WS_CAPTION | 
+        win32con.WS_THICKFRAME | 
+        win32con.WS_MINIMIZEBOX | 
+        win32con.WS_MAXIMIZEBOX | 
+        win32con.WS_SYSMENU
+        ) # adds title bar and border back
+    win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, new_style)
+    win32gui.ShowWindow(hwnd, win32con.SW_RESTORE) #Grabs HWND and uses SW_RESTORE to prevent minimization
+    win32gui.SetWindowPos(hwnd, None, width, height, initializers.width, initializers.height, win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED)
