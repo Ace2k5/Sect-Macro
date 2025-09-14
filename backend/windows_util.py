@@ -28,7 +28,7 @@ def getWindowRes(title: str):
         return
     return game_res
 
-def initattachWindow(hwnd, container): # attaches roblox window to qt application
+def setupattachWindow(hwnd, container): # attaches roblox window to qt application
         current_style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
         new_style = current_style & ~(
             win32con.WS_CAPTION | 
