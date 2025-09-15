@@ -46,7 +46,7 @@ class ImageProcessor():
             else:
                 raise RuntimeError("Rect is None in 'screenshot' in template_matching.py")
         except Exception as e:
-            print(f"Error defining screenshot rectangle: {e}, returning None.")
+            print(f"Error defining screenshot rectangle: {e}, returning None.") # no point in retrying this. GetWindowsRect() should work always.
             return None
         for i in range(5):
             try:
