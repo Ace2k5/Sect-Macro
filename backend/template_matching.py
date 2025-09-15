@@ -35,22 +35,38 @@ class ImageProcessor():
                 print("Problem in initializing images.")
 
     def screenshot(self, rect): #Returns gray image of the current game
-        if rect != None: #grabs region from init.window_info()
-            final_rect = {
-                "left": rect[0],
-                "top": rect[1],
-                "width": rect[2] - rect[0],
-                "height": rect[3] - rect[1]
-            }
-        else:
-            print("Critical bug in template_matching, rect is None. Perhaps the game is not open.")
-        temp_img = self.mss.grab(final_rect)
-        img_np = np.array(temp_img)
-        print(f"[DEBUG] Screenshot rect: {final_rect}, image shape: {img_np.shape}")
-        return cv.cvtColor(img_np, cv.COLOR_BGRA2GRAY)
-    
+        try:
+            if rect != None: #grabs region from init.window_info()
+                final_rect = {
+                    "left": rect[0],
+                    "top": rect[1],
+                    "width": rect[2] - rect[0],
+                    "height": rect[3] - rect[1]
+                }
+            else:
+                raise RuntimeError("Rect is None in 'screenshot' in template_matching.py")
+        except Exception as e:
+            print(f"Error defining screenshot rectangle: {e}, returning None.")
+            return None
+        for i in range(5):
+            try:
+                temp_img = self.mss.grab(final_rect)
+                img_np = np.array(temp_img)
+                if img_np.size == 0:
+                    raise RuntimeError("Captured image is empty.")
+                print(f"[DEBUG] Screenshot rect: {final_rect}, image shape: {img_np.shape}")
+                return cv.cvtColor(img_np, cv.COLOR_BGRA2GRAY)
+            except Exception as e:
+                print(f"Error capturing screenshot (attempt {i+1}/5): {e}")
+                time.sleep(0.1)
+        print("Failed to capture screenshot after 5 attempts.")
+        return None
+        
     def template_matching(self, template_filename: str, rect): #Returns location of what to click
         current_gray = self.screenshot(rect)
+        if current_gray is None:
+            print("Problems regarding screenshot(), immediate fix is required, shutting down program.")
+            os._exit(1)
         template_img = self.templates_grey.get(template_filename) #uses the templates_grey dictionary to find
                                                                     #specific filename
         if template_img is not None:
