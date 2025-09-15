@@ -18,6 +18,7 @@ class Guardians(QMainWindow):
         self.setupRobloxIntegration()
         self.setupMainWindow()
         self.setupRobloxWindow()
+        self.setupTemplateMatching()
         
     def setupQt(self):
         self.layout = QVBoxLayout()
@@ -29,6 +30,9 @@ class Guardians(QMainWindow):
         self.main_widget.setLayout(self.layout)
         self.setCentralWidget(self.main_widget)
         self.layout.addLayout(self.hbox)
+
+    def setupTemplateMatching(self):
+        self.template_match = template_matching.ImageProcessor()
 
     def setupRobloxIntegration(self):
         self.game_res = windows_util.getWindowRes("Roblox")
@@ -76,9 +80,11 @@ class Guardians(QMainWindow):
         button.clicked.connect(self.buttonFunc)
         
     def buttonFunc(self):
-        template = template_matching.ImageProcessor()
-        template.template_matching("main_menu.png", self.roblox_rect)
+        self.template_match.template_matching("main_menu.png", self.roblox_rect)
         
     def closeEvent(self, event):
         windows_util.removeParent(self.hwnd)
+        if hasattr(self, "template_match"):
+            self.template_match.templates_grey.clear()
+            del self.template_match
         super().closeEvent(event)
