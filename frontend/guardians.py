@@ -84,7 +84,4 @@ class Guardians(QMainWindow):
         
     def closeEvent(self, event):
         windows_util.removeParent(self.hwnd)
-        if hasattr(self, "template_match"):
-            self.template_match.templates_grey.clear()
-            del self.template_match
         super().closeEvent(event)
