@@ -1,7 +1,7 @@
 from PyQt5.QtCore import (Qt, QTimer)
 from PyQt5.QtWidgets import (QMainWindow, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
                              QPushButton, QSizePolicy)
-from backend import initializers, windows_util, template_matching
+from backend import initializers, windows_util, template_matching, ORB
 import pyautogui
 import win32con
 import win32gui
@@ -9,7 +9,9 @@ import win32gui
 TITLE = "Sect v0.0.1 | Anime Guardians"
 CURRENT_GAME = "Anime_Guardians"
 
-
+'''
+    Initializes and sets Qtapplication as the parent application where Roblox is the child and is attached to the Qtapplication 
+'''
 class Guardians(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -80,7 +82,8 @@ class Guardians(QMainWindow):
         button.clicked.connect(self.buttonFunc)
         
     def buttonFunc(self):
-        self.template_match.template_matching("main_menu.png", self.roblox_rect)
+        current_roblox_rect = win32gui.GetWindowRect(self.hwnd)
+        self.template_match.both_methods("main_menu.png", current_roblox_rect)            
         
     def closeEvent(self, event):
         windows_util.removeParent(self.hwnd)

@@ -4,7 +4,11 @@ from PyQt5.QtWidgets import (QMainWindow, QLabel, QWidget, QVBoxLayout, QHBoxLay
 from PyQt5.QtGui import QPixmap
 import pyautogui
 from backend import initializers, windows_util
-from . import guardians
+from . import guardiansWindow
+
+'''
+    The initial application window where user can select a multitude of games(?)
+'''
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -67,6 +71,6 @@ Then, we needed the x and y coordinates of the qt application for it to be cente
 
     def buttonFunc(self):
         QTimer.singleShot(100, lambda: self.button.setText("Loading..."))
-        self.new_window = guardians.Guardians()
+        self.new_window = guardiansWindow.Guardians()
         self.new_window.show()
         self.close()
