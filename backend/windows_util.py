@@ -20,13 +20,7 @@ def resolutionMid(window_width: int, window_height: int):
     middle_screen = (x, y)
     return middle_screen
 
-def getWindowRes(title: str):
-    game_res = initializers.resolutions.get(title)
-    if game_res is None:
-        raise RuntimeError(f"Critical bug in initializers, no known names as {title} or {title} is not open yet.")
-    return game_res
-
-def setupattachWindow(hwnd, container): # attaches roblox window to qt application
+def setupattachWindow(hwnd, container, width: int, height: int): # attaches roblox window to qt application
         current_style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
         new_style = current_style & ~(
             win32con.WS_CAPTION | 
@@ -38,11 +32,11 @@ def setupattachWindow(hwnd, container): # attaches roblox window to qt applicati
         win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, new_style)
         win32gui.SetParent(hwnd, int(container.winId())) # set qt window as parent application and roblox as child, so if user decides to move qt application roblox also moves
         win32gui.ShowWindow(hwnd, win32con.SW_RESTORE) #Grabs HWND and uses SW_RESTORE to prevent minimization
-        win32gui.SetWindowPos(hwnd, None, 0, 0, initializers.width, initializers.height, win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED)
+        win32gui.SetWindowPos(hwnd, None, 0, 0, width, height, win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED)
         return container
     
-def removeParent(hwnd): # removes parent qt, restore bars and headers, roblox returns to the middle of the screen via resolutionMid()
-    width, height = resolutionMid(initializers.width, initializers.height)
+def removeParent(hwnd, xwidth: int, xheight: int): # removes parent qt, restore bars and headers, roblox returns to the middle of the screen via resolutionMid()
+    width, height = resolutionMid(xwidth, xheight)
     win32gui.SetParent(hwnd, None)
     current_style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
     new_style = current_style | (
@@ -54,4 +48,4 @@ def removeParent(hwnd): # removes parent qt, restore bars and headers, roblox re
         ) # adds title bar and border back
     win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, new_style)
     win32gui.ShowWindow(hwnd, win32con.SW_RESTORE) #Grabs HWND and uses SW_RESTORE to prevent minimization
-    win32gui.SetWindowPos(hwnd, None, width, height, initializers.width, initializers.height, win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED)
+    win32gui.SetWindowPos(hwnd, None, width, height, xwidth, xheight, win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED)

@@ -6,15 +6,15 @@ import pyautogui
 import win32con
 import win32gui
 #temporary consts
-TITLE = "Sect v0.0.1 | Anime Guardians"
-CURRENT_GAME = "Anime_Guardians"
+TITLE = "Sect v0.0.1"
 
 '''
     Initializes and sets Qtapplication as the parent application where Roblox is the child and is attached to the Qtapplication 
 '''
-class Guardians(QMainWindow):
-    def __init__(self):
+class RobloxWindow(QMainWindow):
+    def __init__(self, game_config: dict):
         super().__init__()
+        self.game_config = game_config
         self.setupQt()
         self.testButton()
         self.setupRobloxIntegration()
@@ -37,20 +37,22 @@ class Guardians(QMainWindow):
         self.template_match = template_matching.ImageProcessor()
 
     def setupRobloxIntegration(self):
-        self.game_res = windows_util.getWindowRes("Roblox")
-        self.hwnd = windows_util.initWindow("Roblox")
+        title = self.game_config["window_title"]
+        print(title)
+        self.game_res = self.game_config["resolution"]
+        self.hwnd = windows_util.initWindow(title)
         self.roblox_rect = win32gui.GetWindowRect(self.hwnd) # (left, top, right, bottom)
 
     def setupMainWindow(self):
         window_width, window_height = self.game_res[0] + 500, self.game_res[1] + 200
         window_x, window_y = windows_util.resolutionMid(window_width, window_height)
         self.setGeometry(window_x, window_y, window_width, window_height)
-        self.setWindowTitle(f"{TITLE}")
+        self.setWindowTitle(f"{TITLE} | {self.game_config['display_name']}")
         self.setStyleSheet("background-color: #1b1b1f;")
         
     def setupRobloxWindow(self):
         self.container.setFixedSize(self.game_res[0] + 20, self.game_res[1] + 40) # after removing title bar and border, windows of roblox still returns as 816 x 638 so we add +20 and +40 for any future discrepancies for qt
-        self.final_container = windows_util.setupattachWindow(self.hwnd, self.container)
+        self.final_container = windows_util.setupattachWindow(self.hwnd, self.container, self.game_res[0], self.game_res[1])
         self.final_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
         self.hbox.addWidget(self.final_container)
@@ -83,8 +85,11 @@ class Guardians(QMainWindow):
         
     def buttonFunc(self):
         current_roblox_rect = win32gui.GetWindowRect(self.hwnd)
-        self.template_match.both_methods("main_menu.png", current_roblox_rect)            
+        location = self.template_match.both_methods("main_menu.png", current_roblox_rect)
+        if location is None:
+            print("No location has been given, skipping the process...")
+            return   
         
     def closeEvent(self, event):
-        windows_util.removeParent(self.hwnd)
+        windows_util.removeParent(self.hwnd, self.game_res[0], self.game_res[1])
         super().closeEvent(event)
