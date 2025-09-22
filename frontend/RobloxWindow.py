@@ -14,7 +14,7 @@ TITLE = "Sect v0.0.1"
 class RobloxWindow(QMainWindow):
     def __init__(self, game_config: dict):
         super().__init__()
-        self.game_config = game_config
+        self.game_config = game_config # originates in mainwindow.py
         self.setupQt()
         self.testButton()
         self.setupRobloxIntegration()
@@ -34,14 +34,14 @@ class RobloxWindow(QMainWindow):
         self.layout.addLayout(self.hbox)
 
     def setupTemplateMatching(self):
-        self.template_match = template_matching.ImageProcessor()
+        game_images = self.game_config.get("game_images")
+        self.template_match = template_matching.ImageProcessor(game_images)
 
     def setupRobloxIntegration(self):
         title = self.game_config["window_title"]
         print(title)
         self.game_res = self.game_config["resolution"]
         self.hwnd = windows_util.initWindow(title)
-        self.roblox_rect = win32gui.GetWindowRect(self.hwnd) # (left, top, right, bottom)
 
     def setupMainWindow(self):
         window_width, window_height = self.game_res[0] + 500, self.game_res[1] + 200

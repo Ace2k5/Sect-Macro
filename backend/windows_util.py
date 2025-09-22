@@ -6,9 +6,15 @@ import win32gui
 
 def initWindow(title: str):
     hwnd = win32gui.FindWindow(None, title)
-    while hwnd is None:
-        print(f"Cannot find {title}, most likely not opened or a rare bug. Redoing...")
-        hwnd = win32gui.FindWindow(None, title)
+    attempts = 0
+    if hwnd is None:
+        print("Cannot find Roblox handle, redoing 5 times...")
+        for i in range(5):
+              hwnd = win32gui.FindWindow(None, title)
+              attempts += 1
+        if attempts >= 5:
+            print("Check failed five times, check if Roblox is open.")
+            return None
     return hwnd
 
 def resolutionMid(window_width: int, window_height: int):

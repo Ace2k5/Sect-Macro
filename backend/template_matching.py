@@ -6,11 +6,12 @@ import os
 from pathlib import Path
 from mss import mss
 from . import initializers, ORB
-folder_dir = Path("Images/")
 
 class ImageProcessor():
-    def __init__(self, max_thresh = 0.85):
+    def __init__(self, game_images=None, max_thresh = 0.85):
         self.max_thresh = max_thresh
+        self.game_images = game_images
+        self.folder_dir = Path(f"Images/{self.game_images}")
         self.mss = mss()
         self.mon_region = self.mss.monitors[1]
         self.center_x = None
@@ -21,18 +22,18 @@ class ImageProcessor():
     def _init_images(self): #Initialize grey images
         self.templates_grey = {}
         print(f"Current working directory: {os.getcwd()}")
-        print(f"Looking for images in: {folder_dir}")
-        print(f"Absolute path: {folder_dir.absolute()}")
-        print(f"Path exists: {folder_dir.exists()}")
-        stored_images = Path(folder_dir).glob('*.png') #reads every single image file saved as .png using .glob
+        print(f"Looking for images in: {self.folder_dir}")
+        print(f"Absolute path: {self.folder_dir.absolute()}")
+        print(f"Path exists: {self.folder_dir.exists()}")
+        stored_images = self.folder_dir.glob('*.png') #reads every single image file saved as .png using .glob
         for image in stored_images: #loops through .png files and cv reads, if not none, store on templates_grey using filename
             filename = image.name
             self.read_image(filename)
     
     def read_image(self, filename): # Reads image and converts to grey, stores in templates_grey
-        image_path = folder_dir / filename
+        image_path = self.folder_dir / filename
         if not image_path.exists():
-            print(f"Image file {filename} does not exist in {folder_dir}.")
+            print(f"Image file {filename} does not exist in {self.folder_dir}.")
         img = cv.imread(str(image_path))
         if img is None:
             print(f"Failed to read image {filename}.")
@@ -69,15 +70,8 @@ class ImageProcessor():
     def both_methods(self, template_filename: str, rect): # Uses both methods of template_matching and a fallback of ORB.
         current_gray = self.screenshot(rect)
         if current_gray is None:
-            attempts = 0
-            for i in range(5):
-                current_gray = self.screenshot(rect)
-                attempts += 1
-                print(f"Attempt: {attempts}")
-                if current_gray is not None:
-                    break
-            if current_gray is None:
-                print("All 5 attempts of getting a screenshot failed. Immediate fix is required.")
+            print("Screenshot has failed. Please fix.")
+            return
         template_img = self.templates_grey.get(template_filename) #uses the templates_grey dictionary to find
                                                                     #specific filename
         if template_img is not None:
@@ -94,6 +88,7 @@ class ImageProcessor():
             return location
         else:
             print(f"Confidence level was too low using {template_filename} in 'template_matching' in template_matching.py. Trying ORB...")
+            ### ORB ###
             center, corners = self.orb.orb_matching(template_img, current_gray)
             if center is None:
                 print("redoing five times. There was a failure in orb matching.")

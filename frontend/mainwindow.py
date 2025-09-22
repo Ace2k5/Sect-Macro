@@ -6,7 +6,7 @@ import pyautogui
 from backend import initializers, windows_util
 from . import robloxwindow
 from functools import partial
-
+import win32gui
 '''
     The initial application window where user can select a multitude of games(?)
 '''
@@ -53,6 +53,7 @@ Then, we needed the x and y coordinates of the qt application for it to be cente
                                 "color: white")
             self.layout.setContentsMargins(0, 0, 0, 300)
             button.clicked.connect(partial(self.buttonFunc, game_config)) # partial prefills some of the args, each individual loop has their own values passed unto RobloxWindow class
+                                                                          # root of all game_configs
             self.layout.addWidget(button, alignment=Qt.AlignTop)
         
     
@@ -69,11 +70,17 @@ Then, we needed the x and y coordinates of the qt application for it to be cente
         image_label.setScaledContents(True)
         self.layout.addWidget(image_label, alignment=Qt.AlignHCenter)'''
 
-    def buttonFunc(self, game_config):
+    def buttonFunc(self, game_config: dict):
         print(f"Loading game: {game_config}")
+        original_message = game_config.get("display_name")
         clicked_button = self.sender()
         if clicked_button:
-            QTimer.singleShot(100, lambda: clicked_button.setText("Loading..."))
-            self.new_window = robloxwindow.RobloxWindow(game_config)
-            self.new_window.show()
-            self.close()
+            try:
+                QTimer.singleShot(100, lambda: clicked_button.setText("Loading..."))
+                self.new_window = robloxwindow.RobloxWindow(game_config)
+                self.new_window.show()
+                self.close()
+            except Exception as e:
+                QTimer.singleShot(100, lambda: clicked_button.setText("Roblox is not open, please open Roblox..."))
+                QTimer.singleShot(2000, lambda:clicked_button.setText(original_message))
+                return
