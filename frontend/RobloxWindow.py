@@ -1,9 +1,6 @@
-from PyQt5.QtCore import (Qt, QTimer)
-from PyQt5.QtWidgets import (QMainWindow, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
+from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QSizePolicy)
-from backend import initializers, windows_util, template_matching, ORB
-import pyautogui
-import win32con
+from backend import windows_util, template_matching
 import win32gui
 #temporary consts
 TITLE = "Sect v0.0.1"
