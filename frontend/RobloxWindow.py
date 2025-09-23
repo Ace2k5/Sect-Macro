@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QSizePolicy)
-from backend import windows_util, template_matching
+from backend import windows_util, template_matching, initializers
 import win32gui
 #temporary consts
 TITLE = "Sect v0.0.1"
@@ -29,6 +29,8 @@ class RobloxWindow(QMainWindow):
         self.main_widget.setLayout(self.layout)
         self.setCentralWidget(self.main_widget)
         self.layout.addLayout(self.hbox)
+        self.qt_res = initializers.qt.get("qt_default_resolution")
+        self.roblox_container = initializers.qt.get("roblox_container_res")
 
     def setupTemplateMatching(self):
         game_images = self.game_config.get("game_images")
@@ -41,14 +43,15 @@ class RobloxWindow(QMainWindow):
         self.hwnd = windows_util.initWindow(title)
 
     def setupMainWindow(self):
-        window_width, window_height = self.game_res[0] + 500, self.game_res[1] + 200
+        window_width, window_height = self.qt_res
         window_x, window_y = windows_util.resolutionMid(window_width, window_height)
         self.setGeometry(window_x, window_y, window_width, window_height)
         self.setWindowTitle(f"{TITLE} | {self.game_config['display_name']}")
         self.setStyleSheet("background-color: #1b1b1f;")
         
     def setupRobloxWindow(self):
-        self.container.setFixedSize(self.game_res[0] + 20, self.game_res[1] + 40) # after removing title bar and border, windows of roblox still returns as 816 x 638 so we add +20 and +40 for any future discrepancies for qt
+        x, y = self.roblox_container
+        self.container.setFixedSize(x, y) # after removing title bar and border, windows of roblox still returns as 816 x 638 so we add +20 and +40 for any future discrepancies for qt
         self.final_container = windows_util.setupattachWindow(self.hwnd, self.container, self.game_res[0], self.game_res[1])
         self.final_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         

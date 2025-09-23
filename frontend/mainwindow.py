@@ -1,12 +1,9 @@
 from PyQt5.QtCore import (Qt, QTimer)
-from PyQt5.QtWidgets import (QMainWindow, QLabel, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
+from PyQt5.QtWidgets import (QMainWindow, QLabel, QWidget, QVBoxLayout,
                              QPushButton)
-from PyQt5.QtGui import QPixmap
-import pyautogui
 from backend import initializers, windows_util
 from . import robloxwindow
 from functools import partial
-import win32gui
 '''
     The initial application window where user can select a multitude of games(?)
 '''
@@ -20,8 +17,7 @@ class MainWindow(QMainWindow):
         #   self.initImages()
         self.initButtons()
     
-    '''We needed first the game resolution which I've set in initializers as 800x600. So we now have window height and window width for the game, but we use this as a foundation for me to extend the application for the roblox window handle.
-Then, we needed the x and y coordinates of the qt application for it to be centered, and so we called upon resolutionMid which took in the parameters of window_width and window_height and returned the position of a centered window via floor division.'''
+    '''We need params x, y, width and height for geometry so we only need the width and height to pass onto resMid for x and y'''
     def setupMain(self):
         window_width, window_height = 1000, 800
         window_x, window_y = windows_util.resolutionMid(window_width, window_height)
@@ -80,7 +76,7 @@ Then, we needed the x and y coordinates of the qt application for it to be cente
                 self.new_window = robloxwindow.RobloxWindow(game_config)
                 self.new_window.show()
                 self.close()
-            except Exception as e:
+            except Exception:
                 QTimer.singleShot(100, lambda: clicked_button.setText("Roblox is not open, please open Roblox..."))
                 QTimer.singleShot(2000, lambda:clicked_button.setText(original_message))
                 return
