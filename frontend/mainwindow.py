@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
     
     '''We need params x, y, width and height for geometry so we only need the width and height to pass onto resMid for x and y'''
     def setupMain(self):
-        window_width, window_height = 1000, 800
+        window_width, window_height = initializers.qt.get("qt_default_resolution")
         window_x, window_y = windows_util.resolutionMid(window_width, window_height)
         self.setGeometry(window_x, window_y, window_width, window_height)
         self.setWindowTitle("Sect v0.0.1")
