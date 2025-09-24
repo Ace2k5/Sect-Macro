@@ -21,5 +21,6 @@ game_configs = {
 }
 qt = {
     "qt_default_resolution": (1000, 800),
-    "roblox_container_res": (820, 640)
+    "roblox_container_res": (820, 640),
+    "worker_container_res": (200, 200)
 }

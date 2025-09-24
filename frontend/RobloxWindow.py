@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QPushButton, QSizePolicy)
+                             QPushButton, QSizePolicy, QTextEdit)
 from backend import windows_util, template_matching, initializers
+from . import threading
 import win32gui
 #temporary consts
 TITLE = "Sect v0.0.1"
@@ -32,6 +33,13 @@ class RobloxWindow(QMainWindow):
         self.qt_res = initializers.qt.get("qt_default_resolution")
         self.roblox_container = initializers.qt.get("roblox_container_res")
 
+    def setupLogs(self, game_config: str): # specialized game configs should have a set function in the future.
+        self.threadUpdate = threading.attachedWindow(game_config)
+        self.log_box = QTextEdit()
+        self.log_box.setReadOnly(True)
+        self.hbox.addWidget(self.log_box)
+        self.setGeometry()
+
     def setupTemplateMatching(self):
         game_images = self.game_config.get("game_images")
         self.template_match = template_matching.ImageProcessor(game_images)
@@ -50,8 +58,14 @@ class RobloxWindow(QMainWindow):
         self.setStyleSheet("background-color: #1b1b1f;")
         
     def setupRobloxWindow(self):
+        '''
+        Attachment of the roblox container to Qt GUI:
+        roblox_container comes setupQt
+        hwnd comes from setupRobloxIntegration
+        setupattachWindow requires 4 params: hwnd, size of container, width and height
+        '''
         x, y = self.roblox_container
-        self.container.setFixedSize(x, y) # after removing title bar and border, windows of roblox still returns as 816 x 638 so we add +20 and +40 for any future discrepancies for qt
+        self.container.setFixedSize(x, y)
         self.final_container = windows_util.setupattachWindow(self.hwnd, self.container, self.game_res[0], self.game_res[1])
         self.final_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         

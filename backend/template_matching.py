@@ -1,13 +1,18 @@
 import cv2 as cv
 import numpy as np
 import time
-import matplotlib.pyplot as plt
 import os
 from pathlib import Path
 from mss import mss
-from . import initializers, ORB
+from . import ORB
 
 class ImageProcessor():
+    '''
+    setup for the fast screenshot(mss), folder directory(folder_dir), which monitor to use(monitor[1] because
+    monitor[0] would mean every single display, but monitor[1] focuses on primary display), thresh set as 0.85 since 0.90
+    is strict, game_images comes from the partial set in mainwindow.py where each game should be linking towards a
+    different folder in Images. ORB is a fallback image detection system incase original template_matching fails.
+    '''
     def __init__(self, game_images=None, max_thresh = 0.85):
         self.max_thresh = max_thresh
         self.game_images = game_images
@@ -20,6 +25,14 @@ class ImageProcessor():
         self.orb = ORB.OrbHandler()
 
     def _init_images(self): #Initialize grey images
+        '''
+        caches grey images for easier runtime.
+        steps:
+        1. set up dictionary of grey_images
+        2. print debug statements for where the program fails
+        3. use glob to see what images are being seen in .png format
+        4. for image in stored_images inside of the folder_dir is read based on how many glob found.
+        '''
         self.templates_grey = {}
         print(f"Current working directory: {os.getcwd()}")
         print(f"Looking for images in: {self.folder_dir}")
@@ -31,6 +44,14 @@ class ImageProcessor():
             self.read_image(filename)
     
     def read_image(self, filename): # Reads image and converts to grey, stores in templates_grey
+        '''
+        turns every img into gray.
+        steps:
+        1. set image path, this is based on initializers and set on partial located in mainwindow.py
+        2. read image first
+        3. turn it into gray
+        4. the coloured version of the image gets replaced by the gray image in templates_grey
+        '''
         image_path = self.folder_dir / filename
         if not image_path.exists():
             print(f"Image file {filename} does not exist in {self.folder_dir}.")
@@ -42,8 +63,15 @@ class ImageProcessor():
         return gray_img
 
     def screenshot(self, rect): #Returns gray image of the current game
+        '''
+        responsible for what the computer sees
+        steps:
+        1. get rect, grab x and y (relative to screen) and size of the game's width and height
+        2. try up to 5 times
+        3. return as a gray image
+        '''
         try:
-            if rect != None: #grabs region from init.window_info()
+            if rect is not None: #grabs region from init.window_info()
                 final_rect = {
                     "left": rect[0],
                     "top": rect[1],
@@ -68,6 +96,19 @@ class ImageProcessor():
         print("Failed to capture screenshot after 5 attempts.")
         
     def both_methods(self, template_filename: str, rect): # Uses both methods of template_matching and a fallback of ORB.
+        '''
+        includes both template matching and ORB
+        steps:
+        1. get screenshot based on what rect is given (located in frontend)
+        2. given filename is being searched if it exists in templates_grey
+        3. grab confidence value
+        4. centers the x and y coords
+        5. return location
+        ------ IF FAILS ------
+        6. ORB takes the wheel and compares current gray image to the template_img
+        7. gives center by adding x and y of game to the already centered screen (explanation: We must add x and y so we
+        know where the game is located.)
+        '''
         current_gray = self.screenshot(rect)
         if current_gray is None:
             print("Screenshot has failed. Please fix.")
@@ -77,37 +118,25 @@ class ImageProcessor():
         if template_img is not None:
             result = cv.matchTemplate(current_gray, template_img, cv.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv.minMaxLoc(result)
-        else:
-            print(f"Image {template_filename} was not found in 'template_matching' in template_matching.py")
 
-        if max_val >= self.max_thresh:
-            self.center_x = rect[0] + max_loc[0] + (template_img.shape[1] // 2)
-            self.center_y = rect[1] + max_loc[1] + (template_img.shape[0] // 2)
-            print(f"Found values: X = {self.center_x}, Y = {self.center_y} with confidence level of {max_val}")
-            location = (self.center_x, self.center_y)
-            return location
-        else:
-            print(f"Confidence level was too low using {template_filename} in 'template_matching' in template_matching.py. Trying ORB...")
-            ### ORB ###
-            center, corners = self.orb.orb_matching(template_img, current_gray)
-            if center is None:
-                print("redoing five times. There was a failure in orb matching.")
-                attempts = 0
-                for i in range(5):
-                    center, corners = self.orb.orb_matching(template_img, current_gray)
-                    attempts += 1
-                    print(f"Attempt: {attempts}")
-                    if center is not None:
-                        break
-            if center is None:
-                print("All ORB attempts have been failed, fix is required.")
-                return None
+            if max_val >= self.max_thresh:
+                self.center_x = rect[0] + max_loc[0] + (template_img.shape[1] // 2)
+                self.center_y = rect[1] + max_loc[1] + (template_img.shape[0] // 2)
+                print(f"Found values: X = {self.center_x}, Y = {self.center_y} with confidence level of {max_val}")
+                location = (self.center_x, self.center_y)
+                return location
             else:
+                print(f"Confidence level was too low using {template_filename} in 'template_matching' in template_matching.py. Trying ORB...")
+                ### ORB ###
+                center, corners = self.orb.orb_matching(template_img, current_gray)
                 self.center_x = rect[0] + center[0]
                 self.center_y = rect[1] + center[1]
                 print(f"Found location using ORB in coordinates X: {self.center_x}, and Y: {self.center_y}")
                 location = (self.center_x, self.center_y)
                 return location
+            
+        else:
+            print(f"Image {template_filename} was not found in 'template_matching' in template_matching.py")
     
     
     
