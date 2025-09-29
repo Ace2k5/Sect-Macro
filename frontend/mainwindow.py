@@ -2,7 +2,7 @@ from PyQt5.QtCore import (Qt, QTimer)
 from PyQt5.QtWidgets import (QMainWindow, QLabel, QWidget, QVBoxLayout,
                              QPushButton)
 from backend import initializers, windows_util
-from . import robloxwindow
+from . import RobloxWindow
 from functools import partial
 '''
     The initial application window where user can select a multitude of games(?)
@@ -73,7 +73,7 @@ class MainWindow(QMainWindow):
         if clicked_button:
             try:
                 QTimer.singleShot(100, lambda: clicked_button.setText("Loading..."))
-                self.new_window = robloxwindow.RobloxWindow(game_config)
+                self.new_window = RobloxWindow.RobloxWindow(game_config)
                 self.new_window.show()
                 self.close()
             except Exception:

@@ -1,8 +1,12 @@
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QSizePolicy, QTextEdit)
+from PyQt5.QtCore import QTimer
 from backend import windows_util, template_matching, initializers
 from . import threading
 import win32gui
+from pathlib import Path
+import win32api
+
 #temporary consts
 TITLE = "Sect v0.0.1"
 
@@ -14,13 +18,16 @@ class RobloxWindow(QMainWindow):
         super().__init__()
         self.game_config = game_config # originates in mainwindow.py
         self.setupQt()
-        self.testButton()
         self.setupRobloxIntegration()
         self.setupMainWindow()
         self.setupRobloxWindow()
         self.setupTemplateMatching()
         
     def setupQt(self):
+        '''
+        sets up qt buttons and miscellaneous
+        '''
+        self.timer = QTimer()
         self.layout = QVBoxLayout()
         self.container = QWidget(self)
         self.main_widget = QWidget()
@@ -32,6 +39,9 @@ class RobloxWindow(QMainWindow):
         self.layout.addLayout(self.hbox)
         self.qt_res = initializers.qt.get("qt_default_resolution")
         self.roblox_container = initializers.qt.get("roblox_container_res")
+        self.testButton()
+        self.mouseButton()
+        self.timer.timeout.connect(self.printMouse)     
 
     def setupLogs(self, game_config: str): # specialized game configs should have a set function in the future.
         self.threadUpdate = threading.attachedWindow(game_config)
@@ -41,16 +51,25 @@ class RobloxWindow(QMainWindow):
         self.setGeometry()
 
     def setupTemplateMatching(self):
-        game_images = self.game_config.get("game_images")
-        self.template_match = template_matching.ImageProcessor(game_images)
+        '''
+        sets up template_matching class
+        '''
+        self.game_images = Path("Images") / self.game_config.get("game_images")
+        self.template_match = template_matching.ImageProcessor(self.game_images)
 
     def setupRobloxIntegration(self):
+        '''
+        attaches roblox to qt
+        '''
         title = self.game_config["window_title"]
         print(title)
         self.game_res = self.game_config["resolution"]
         self.hwnd = windows_util.initWindow(title)
 
     def setupMainWindow(self):
+        '''
+        sets the qt application width and height
+        '''
         window_width, window_height = self.qt_res
         window_x, window_y = windows_util.resolutionMid(window_width, window_height)
         self.setGeometry(window_x, window_y, window_width, window_height)
@@ -94,8 +113,30 @@ class RobloxWindow(QMainWindow):
                              "font-weight: bold;"
                              "color: white")
         self.hbox.addWidget(button)
-        self.button = button
         button.clicked.connect(self.buttonFunc)
+        
+    def mouseButton(self):
+        button = QPushButton("Mouse Debug", self)
+        button.setCheckable(True)
+        button.setStyleSheet("font-size: 30px;" \
+                             "font-family: Times New Roman;" 
+                             "font-weight: bold;"
+                             "color: white")
+        self.hbox.addWidget(button)
+        button.toggled.connect(self.mouseLoc)
+    
+    def mouseLoc(self, state):
+        if state:
+            self.timer.start(200)
+        else:
+            self.timer.stop()
+        
+    def printMouse(self):
+        self.timer.start(200)
+        x, y = win32api.GetCursorPos()
+        rect = win32gui.GetWindowRect(self.hwnd)
+        relative_x, relative_y = (x - rect[0]), (y - rect[1])
+        print((relative_x, relative_y))
         
     def buttonFunc(self):
         current_roblox_rect = win32gui.GetWindowRect(self.hwnd)
@@ -105,5 +146,8 @@ class RobloxWindow(QMainWindow):
             return   
         
     def closeEvent(self, event):
+        '''
+        safely de-attaches roblox from qt
+        '''
         windows_util.removeParent(self.hwnd, self.game_res[0], self.game_res[1])
         super().closeEvent(event)
