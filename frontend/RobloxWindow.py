@@ -25,10 +25,6 @@ class RobloxWindow(QMainWindow):
         self.manager.setupRobloxIntegration()
         self.manager.setupTemplateMatching()
         self.manager.setupRobloxWindow()
-        # IMPORTANT VARIABLES #
-        self.hwnd = self.manager.hwnd
-        self.template_match = self.manager.template_match
-        self.game_res = self.manager.game_res
         # DEV TOOLS #
         self.setupDebugControls()
         
@@ -68,7 +64,7 @@ class RobloxWindow(QMainWindow):
         '''
         for debugging window, checking template_matching and all other stuff.
         '''
-        self.debug = debug_utils.frontUtils(self.hbox, self.hwnd, self.template_match, self.main_widget, self.manager)
+        self.debug = debug_utils.frontUtils(self.hbox, self.manager.hwnd, self.manager.template_match, self.main_widget, self.manager)
         self.debug.testButton()
         self.debug.mouseButton()
         

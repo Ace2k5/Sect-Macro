@@ -131,11 +131,13 @@ class ImageProcessor():
                 center, corners = self.orb.orb_matching(template_img, current_gray)
                 if center is None or center == (0,0):
                     print("ORB has failed. Reconnection is required.")
+                    return None
                 else:
                     self.center_x = rect[0] + center[0]
                     self.center_y = rect[1] + center[1]
                     print(f"Found location using ORB in coordinates X: {self.center_x}, and Y: {self.center_y}")
                     location = (self.center_x, self.center_y)
+                    return location
             
         else:
             print(f"Image {template_filename} was not found in 'template_matching' in template_matching.py")

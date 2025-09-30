@@ -24,7 +24,7 @@ class gameManager(QObject):
         
     def setupRobloxIntegration(self):
         '''
-        attaches roblox to qt
+        attaches roblox to qt and also gets the resolution from dict in initializers.py
         '''
         title = self.game_config.get("window_title")
         print(title)

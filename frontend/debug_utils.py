@@ -7,13 +7,11 @@ from pathlib import Path
 import win32api
 
 class frontUtils(QObject):
-    def __init__(self, hbox, hwnd, template_match, main_widget, game_manager):
+    def __init__(self, hbox, main_widget, game_manager):
         super().__init__()
         self.main_widget = main_widget
-        self.hbox = hbox
-        self.hwnd = hwnd
-        self.template_match = template_match
         self.timer = QTimer()
+        self.hbox = hbox
         self.game_manager = game_manager
         self.timer.timeout.connect(self.game_manager.printMouse)
     
