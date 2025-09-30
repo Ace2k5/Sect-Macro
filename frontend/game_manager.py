@@ -6,7 +6,7 @@ from . import threading, debug_utils
 import win32gui
 from pathlib import Path
 import win32api
-
+TITLE = "Sect v0.0.1"
 class gameManager(QObject):
     def __init__(self, hbox, roblox_container, container, game_config: dict):
         super().__init__()
@@ -30,11 +30,14 @@ class gameManager(QObject):
         print(title)
         self.game_res = self.game_config.get("resolution")
         self.hwnd = windows_util.initWindow(title)
+        if self.hwnd is None or self.hwnd == 0:
+            print("HWND is invalid.")
+            return
         
     def setupRobloxWindow(self):
         '''
         Attachment of the roblox container to Qt GUI:
-        roblox_container comes setupQt
+        roblox_container comes from setupQt
         hwnd comes from setupRobloxIntegration
         setupattachWindow requires 4 params: hwnd, size of container, width and height
         '''
@@ -73,16 +76,28 @@ class gameManager(QObject):
         '''
         this function gets the relative positioning of the roblox application. By subtracting the position of the cursor and the x and y of the application
         we are able to find where the roblox window is and check if it is outside the boundary
+        steps:
+        1. get cursor x and y via getcursorpos()
+        2. find top and left from getwindowrect(self.hwnd)
+        3. subtract x - top, y - left to get relative x and y to the screen of the Roblox window
+        4. left, top, right, bottom to detect the relative position of roblox window
+        5. check if qt application is minimized first to stop unnecessary logs when qt is minimized
+        6. if x is greater than left and less than right, then it is outside the boundary, same goes for y but top and bottom
         '''
         x, y = win32api.GetCursorPos()
         rect = win32gui.GetWindowRect(self.hwnd)
         relative_x, relative_y = (x - rect[0]), (y - rect[1])
         left, top, right, bottom = win32gui.GetWindowRect(self.hwnd)
-        if left <= x <= right and top <= y <= bottom:
-            relative_x, relative_y = x - left, y - top
-            print((relative_x, relative_y))
+        
+        minimized = self.qt_hwnd()
+        if win32gui.IsIconic(minimized):
+            print("Window is minimized.")
         else:
-            print("The mouse is outside the boundary.")
+            if left <= x <= right and top <= y <= bottom:
+                relative_x, relative_y = x - left, y - top
+                print((relative_x, relative_y))
+            else:
+                print("Mouse is outside boundary.")
     
     def buttonFunc(self):
         current_roblox_rect = win32gui.GetWindowRect(self.hwnd)
@@ -92,4 +107,7 @@ class gameManager(QObject):
             return
         return location
         
+    def qt_hwnd(self):
+        hwnd = win32gui.FindWindow(None, (f"{TITLE} | {self.game_config['display_name']}"))
+        return hwnd
     

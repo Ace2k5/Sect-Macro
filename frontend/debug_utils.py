@@ -5,7 +5,6 @@ from . import threading
 import win32gui
 from pathlib import Path
 import win32api
-
 class frontUtils(QObject):
     def __init__(self, hbox, main_widget, game_manager):
         super().__init__()

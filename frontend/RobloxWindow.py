@@ -64,7 +64,7 @@ class RobloxWindow(QMainWindow):
         '''
         for debugging window, checking template_matching and all other stuff.
         '''
-        self.debug = debug_utils.frontUtils(self.hbox, self.manager.hwnd, self.manager.template_match, self.main_widget, self.manager)
+        self.debug = debug_utils.frontUtils(self.hbox, self.main_widget, self.manager)
         self.debug.testButton()
         self.debug.mouseButton()
         

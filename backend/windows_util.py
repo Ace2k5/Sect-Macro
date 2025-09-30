@@ -17,6 +17,8 @@ def initWindow(title: str):
         for i in range(5):
               hwnd = win32gui.FindWindow(None, title)
               attempts += 1
+              if hwnd is not None:
+                  return hwnd
         if attempts >= 5:
             print("Check failed five times, check if Roblox is open.")
             return None
@@ -91,3 +93,4 @@ def removeParent(hwnd, width: int, height: int): # removes parent qt, restore ba
     win32gui.SetWindowLong(hwnd, win32con.GWL_STYLE, new_style)
     win32gui.ShowWindow(hwnd, win32con.SW_RESTORE) #Grabs HWND and uses SW_RESTORE to prevent minimization
     win32gui.SetWindowPos(hwnd, None, x, y, width, height, win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED)
+    return
