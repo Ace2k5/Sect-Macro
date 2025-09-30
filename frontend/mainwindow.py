@@ -42,7 +42,7 @@ class MainWindow(QMainWindow):
         
     def initButtons(self):
         for game_config in initializers.game_configs.values():
-            button = QPushButton(game_config["display_name"], self)
+            button = QPushButton(game_config.get("display_name"), self)
             button.setStyleSheet("font-size: 30px;" \
                                 "font-family: Times New Roman;" 
                                 "font-weight: bold;"

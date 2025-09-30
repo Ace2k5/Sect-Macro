@@ -57,7 +57,7 @@ class RobloxWindow(QMainWindow):
         window_width, window_height = self.qt_res
         window_x, window_y = windows_util.resolutionMid(window_width, window_height)
         self.setGeometry(window_x, window_y, window_width, window_height)
-        self.setWindowTitle(f"{TITLE} | {self.game_config['display_name']}")
+        self.setWindowTitle(f"{TITLE} | {self.game_config.get('display_name')}")
         self.setStyleSheet("background-color: #1b1b1f;")
         
         
