@@ -38,7 +38,7 @@ class frontUtils(QObject):
             
     def mouseLoc(self, state):
         '''
-        functions as the time.sleep equivalent of Qt.
+        functions as the time.sleep equivalent of Qt for self.timer. The primary receiver of the sender() in mouseButton
         '''
         sender_button = self.sender()
         if state:
