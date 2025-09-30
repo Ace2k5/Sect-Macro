@@ -89,7 +89,7 @@ class gameManager(QObject):
         3. subtract x - top, y - left to get relative x and y to the screen of the Roblox window
         4. left, top, right, bottom to detect the relative position of roblox window
         5. check if qt application is minimized first to stop unnecessary logs when qt is minimized
-        6. if x is greater than left and less than right, then it is outside the boundary, same goes for y but top and bottom
+        6. if x is greater than left and less than right, then it is inside the boundary, same goes for y but top and bottom otherwise it is outside
         '''
         x, y = win32api.GetCursorPos()
         rect = win32gui.GetWindowRect(self.hwnd)
