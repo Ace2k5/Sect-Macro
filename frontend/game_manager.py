@@ -1,19 +1,20 @@
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QSizePolicy, QTextEdit)
 from PyQt5.QtCore import QTimer, QObject
-from backend import windows_util, template_matching, initializers
+from backend import windows_util, template_matching, initializers, clicks
 from . import threading, debug_utils
 import win32gui
 from pathlib import Path
 import win32api
 TITLE = "Sect v0.0.1"
 class gameManager(QObject):
-    def __init__(self, hbox, roblox_container, container, game_config: dict):
+    def __init__(self, hbox, roblox_container, container, qt_window_handle, game_config: dict):
         super().__init__()
         self.hbox = hbox
         self.game_config = game_config
         self.roblox_container = roblox_container
         self.container = container
+        self.qt_hwnd = qt_window_handle
         
     def setupTemplateMatching(self):
         '''
@@ -21,6 +22,12 @@ class gameManager(QObject):
         '''
         self.game_images = self.game_config.get("game_images")
         self.template_match = template_matching.ImageProcessor(self.game_images)
+        
+    def click(self, location=None, hardlocation=None, rect=None):
+        if location:
+            clicks.left_click_location(location)
+        if hardlocation and rect:
+            clicks.left_hardcoded_clicks(hardlocation, rect)
         
     def setupRobloxIntegration(self):
         '''
@@ -89,7 +96,7 @@ class gameManager(QObject):
         relative_x, relative_y = (x - rect[0]), (y - rect[1])
         left, top, right, bottom = win32gui.GetWindowRect(self.hwnd)
         
-        minimized = self.qt_hwnd()
+        minimized = self.qt_hwnd
         if win32gui.IsIconic(minimized):
             print("Window is minimized.")
         else:
@@ -105,9 +112,8 @@ class gameManager(QObject):
         if location is None:
             print("No location has been given, skipping the process...")
             return
+        self.click(location)
+        location = self.template_match.both_methods("sjw.png", current_roblox_rect)
+        self.click(location)
         return location
-        
-    def qt_hwnd(self):
-        hwnd = win32gui.FindWindow(None, (f"{TITLE} | {self.game_config['display_name']}"))
-        return hwnd
     

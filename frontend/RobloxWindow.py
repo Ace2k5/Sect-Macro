@@ -20,8 +20,9 @@ class RobloxWindow(QMainWindow):
         # Qt #
         self.setupQt()
         self.setupMainWindow()
+        qt_window_handle = self.winId()
         # GAME MANAGER #
-        self.manager = game_manager.gameManager(self.hbox, self.roblox_container, self.container, self.game_config)
+        self.manager = game_manager.gameManager(self.hbox, self.roblox_container, self.container, qt_window_handle, self.game_config)
         self.manager.setupRobloxIntegration()
         self.manager.setupTemplateMatching()
         self.manager.setupRobloxWindow()
