@@ -28,10 +28,10 @@ class ImageProcessor():
         '''
         caches grey images for easier runtime.
         steps:
-        1. set up dictionary of grey_images
+        1. set up dictionary of empty grey_images
         2. print debug statements for where the program fails
         3. use glob to see what images are being seen in .png format
-        4. for image in stored_images inside of the folder_dir is read based on how many glob found.
+        4. for image in stored_images every file in folder_dir gets read and turns into grey using read_image(filename)
         '''
         self.templates_grey = {}
         print(f"Current working directory: {os.getcwd()}")
@@ -129,11 +129,13 @@ class ImageProcessor():
                 print(f"Confidence level was too low using {template_filename} in 'template_matching' in template_matching.py. Trying ORB...")
                 ### ORB ###
                 center, corners = self.orb.orb_matching(template_img, current_gray)
-                self.center_x = rect[0] + center[0]
-                self.center_y = rect[1] + center[1]
-                print(f"Found location using ORB in coordinates X: {self.center_x}, and Y: {self.center_y}")
-                location = (self.center_x, self.center_y)
-                return location
+                if center is None or center == (0,0):
+                    print("ORB has failed. Reconnection is required.")
+                else:
+                    self.center_x = rect[0] + center[0]
+                    self.center_y = rect[1] + center[1]
+                    print(f"Found location using ORB in coordinates X: {self.center_x}, and Y: {self.center_y}")
+                    location = (self.center_x, self.center_y)
             
         else:
             print(f"Image {template_filename} was not found in 'template_matching' in template_matching.py")

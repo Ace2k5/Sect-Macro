@@ -8,7 +8,7 @@ class attachedWindow(QMainWindow):
     def __init__(self, step):
         super().__init__()
         self.step = step
-        self.setupQt()
+        self.setupQtWorker()
 
     def setupWorker(self):
         self.thread = QThread()
@@ -18,13 +18,11 @@ class attachedWindow(QMainWindow):
     def updateStatus(self, step):
         self.status_label.setText(f"Currently at {step}")
 
-    def setupQt(self):
+    def setupQtWorker(self):
         self.layout = QVBoxLayout()
         self.container = QWidget(self)
         self.main_widget = QWidget()
         self.hbox = QHBoxLayout()
-        self.setContentsMargins(0, 0, 0, 0)
-        self.layout.setSpacing(1)
         self.main_widget.setLayout(self.layout)
         self.setCentralWidget(self.main_widget)
         self.layout.addLayout(self.hbox)
@@ -32,6 +30,7 @@ class attachedWindow(QMainWindow):
     
     def setupWindow(self):
         container_width, container_height = self.container_size
+        
 
 class Worker(QObject):
     finished = pyqtSignal()
