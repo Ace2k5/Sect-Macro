@@ -22,7 +22,7 @@ class RobloxWindow(QMainWindow):
         self.setupMainWindow()
         qt_window_handle = self.winId()
         # GAME MANAGER #
-        self.manager = game_manager.gameManager(self.hbox, self.roblox_container, self.container, qt_window_handle, self.game_config)
+        self.manager = game_manager.gameManager(self.hbox, self.roblox_container, self.container, qt_window_handle, self.layout, self.game_config)
         self.manager.setupRobloxIntegration()
         self.manager.setupTemplateMatching()
         self.manager.setupRobloxWindow()
@@ -65,9 +65,12 @@ class RobloxWindow(QMainWindow):
         '''
         for debugging window, checking template_matching and all other stuff.
         '''
-        self.debug = debug_utils.frontUtils(self.hbox, self.main_widget, self.manager)
+        self.debug = debug_utils.frontUtils(self.hbox, self.main_widget, self.manager, self.layout)
         self.debug.testButton()
         self.debug.mouseButton()
+        
+    def setupThreading(self):
+        self.thread = threading.attachedWindow(None, self.layout)
         
     def closeEvent(self, event):
         '''

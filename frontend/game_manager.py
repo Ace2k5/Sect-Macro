@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QSizePolicy, QTextEdit)
-from PyQt5.QtCore import QTimer, QObject
+from PyQt5.QtCore import QTimer, QObject, QThread
 from backend import windows_util, template_matching, initializers, clicks
 from . import threading, debug_utils
 import win32gui
@@ -8,22 +8,28 @@ from pathlib import Path
 import win32api
 TITLE = "Sect v0.0.1"
 class gameManager(QObject):
-    def __init__(self, hbox, roblox_container, container, qt_window_handle, game_config: dict):
+    def __init__(self, hbox, roblox_container, container, qt_window_handle, layout, game_config: dict):
         super().__init__()
         self.hbox = hbox
         self.game_config = game_config
         self.roblox_container = roblox_container
         self.container = container
         self.qt_hwnd = qt_window_handle
+        self.layout = layout
+        self.template_worker = None
+        self.template_thread = None
+        self.location = None
+        
+# --------------------------SETUP-------------------------------------- #
         
     def setupTemplateMatching(self):
         '''
         sets up template_matching class
         '''
-        self.game_images = self.game_config.get("game_images")
+        self.game_images = self.game_config.get('game_images')
         self.template_match = template_matching.ImageProcessor(self.game_images)
         
-    def click(self, location=None, hardlocation=None, rect=None):
+    def click(self, location, hardlocation=None, rect=None):
         if location:
             clicks.left_click_location(location)
         if hardlocation and rect:
@@ -60,10 +66,35 @@ class gameManager(QObject):
     def deattachWindow(self):
         windows_util.removeParent(self.hwnd, self.game_res[0], self.game_res[1])
         
+# --------------------------SETUP-------------------------------------- #
+
+# ------------------------- THREAD ------------------------------- #
+    def handle_location_found(self, location):
+        print(f"Found location in: {location}")
+        self.location = location
         
+    def start_worker(self, template_match, template_filename, rect):
+        self.template_thread = QThread()
+        self.template_worker = threading.Worker()
+        self.template_worker.setup(template_match, template_filename, rect)
+        self.template_worker.moveToThread(self.template_thread)
         
+        self.template_worker.location_found.connect(self.handle_location_found)
         
-    # --------------------- DEBUG TOOLS
+        self.template_worker.finished.connect(self.template_thread.quit)
+        self.template_worker.finished.connect(self.template_worker.deleteLater)
+        self.template_thread.finished.connect(self.template_thread.deleteLater)
+        
+        self.template_thread.started.connect(self.template_worker.run)
+        self.template_thread.start()
+        
+    def cleanupWorker(self):
+        if self.template_thread and self.template_thread.isRunning():
+            self.template_thread.quit()
+            self.template_thread.wait()
+        print("Worker cleaned up.")
+        
+    # --------------------- DEBUG TOOLS --------------------- #
     def _debugWindowInfo(self):
         ### --- DEBUG INFO --- ###
         print("=== Qt container ===")
@@ -108,12 +139,10 @@ class gameManager(QObject):
     
     def buttonFunc(self):
         current_roblox_rect = win32gui.GetWindowRect(self.hwnd)
-        location = self.template_match.both_methods("main_menu.png", current_roblox_rect)
-        if location is None:
-            print("No location has been given, skipping the process...")
-            return
-        self.click(location)
-        location = self.template_match.both_methods("sjw.png", current_roblox_rect)
-        self.click(location)
-        return location
+        self.start_worker(self.template_match, "sjw.png", current_roblox_rect)
+        self.click(self.location)
+        
     
+        
+        
+        

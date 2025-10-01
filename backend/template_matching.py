@@ -3,7 +3,6 @@ import numpy as np
 import time
 import os
 from pathlib import Path
-from mss import mss
 from . import ORB
 
 class ImageProcessor():
@@ -17,8 +16,6 @@ class ImageProcessor():
         self.max_thresh = max_thresh
         self.game_images = game_images
         self.folder_dir = Path(f"Images/{self.game_images}")
-        self.mss = mss()
-        self.mon_region = self.mss.monitors[1]
         self.center_x = None
         self.center_y = None
         self._init_images()
@@ -62,7 +59,7 @@ class ImageProcessor():
         self.templates_grey[filename] = gray_img
         return gray_img
 
-    def screenshot(self, rect): #Returns gray image of the current game
+    def screenshot(self, rect, mss): #Returns gray image of the current game
         '''
         responsible for what the computer sees
         steps:
@@ -84,7 +81,7 @@ class ImageProcessor():
             print(f"Error defining screenshot rectangle: {e}, returning None.") # no point in retrying this. GetWindowsRect() should work always.
         for i in range(5): # try to capture screenshot up to 5 times
             try:
-                temp_img = self.mss.grab(final_rect)
+                temp_img = mss.grab(final_rect)
                 img_np = np.array(temp_img)
                 if img_np.size == 0:
                     print("Captured image is empty.")
@@ -95,7 +92,7 @@ class ImageProcessor():
                 time.sleep(0.1)
         print("Failed to capture screenshot after 5 attempts.")
         
-    def both_methods(self, template_filename: str, rect): # Uses both methods of template_matching and a fallback of ORB.
+    def both_methods(self, template_filename: str, rect, mss): # Uses both methods of template_matching and a fallback of ORB.
         '''
         includes both template matching and ORB
         steps:
@@ -109,7 +106,7 @@ class ImageProcessor():
         7. gives center by adding x and y of game to the already centered screen (explanation: We must add x and y so we
         know where the game is located.)
         '''
-        current_gray = self.screenshot(rect)
+        current_gray = self.screenshot(rect, mss)
         if current_gray is None:
             print("Screenshot has failed. Please fix.")
             return
@@ -140,7 +137,7 @@ class ImageProcessor():
                     return location
             
         else:
-            print(f"Image {template_filename} was not found in 'template_matching' in template_matching.py")
+            print(f"Image: {template_filename} was not found in 'template_matching' in template_matching.py")
     
     
     

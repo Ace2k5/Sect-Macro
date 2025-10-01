@@ -3,43 +3,38 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QPushButton, QSizePolicy)
 import time
 from backend import initializers
-
-class attachedWindow(QMainWindow):
-    def __init__(self, step):
-        super().__init__()
-        self.step = step
-        self.setupQtWorker()
-
-    def setupWorker(self):
-        self.thread = QThread()
-        self.worker = Worker()
-        self.worker.moveToThread(self.thread)
-    
-    def updateStatus(self, step):
-        self.status_label.setText(f"Currently at {step}")
-
-    def setupQtWorker(self):
-        self.layout = QVBoxLayout()
-        self.container = QWidget(self)
-        self.main_widget = QWidget()
-        self.hbox = QHBoxLayout()
-        self.main_widget.setLayout(self.layout)
-        self.setCentralWidget(self.main_widget)
-        self.layout.addLayout(self.hbox)
-        self.container_size = initializers.qt.get("worker_container_res")
-    
-    def setupWindow(self):
-        container_width, container_height = self.container_size
-        
+from mss import mss
 
 class Worker(QObject):
     finished = pyqtSignal()
-    progress = pyqtSignal(str)
+    progress = pyqtSignal(object)
+    location_found = pyqtSignal(tuple)
+    
+    def __init__(self):
+        super().__init__()
+        self.img_proc = None
+        self.template_filename = None
+        self.rect = None
+        
+    def setup(self, proc, filename, rect):
+        self.img_proc = proc
+        self.template_filename = filename
+        self.rect = rect
 
-    def run(self, step, sleep=1): # sleep should depend on a txt file in the future...
-        while step > 0:
-            self.progress.emit(step)
-            time.sleep(sleep)
-            step -= 1
-        self.progress.emit("Finished.")
-        self.finished.emit()
+    def run(self, sleep=1): # sleep should depend on a txt file in the future...
+        try:
+            if self.img_proc and self.template_filename and self.rect:
+                with mss() as sct:
+                    self.img_proc.mss = sct
+                    self.img_proc.mon_region = sct.monitors[1]
+                    location = self.img_proc.both_methods(self.template_filename, self.rect, self.img_proc.mss)
+                if location:
+                    self.location_found.emit(location)
+                self.progress.emit(location)
+            else:
+                print("Workern not init properly.")
+        except Exception as e:
+            self.progress.emit(None)
+        finally:
+            self.progress.emit("Finished.")
+            self.finished.emit()

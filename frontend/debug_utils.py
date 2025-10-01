@@ -6,12 +6,13 @@ import win32gui
 from pathlib import Path
 import win32api
 class frontUtils(QObject):
-    def __init__(self, hbox, main_widget, game_manager):
+    def __init__(self, hbox, main_widget, game_manager, vbox):
         super().__init__()
         self.main_widget = main_widget
         self.timer = QTimer()
         self.hbox = hbox
         self.game_manager = game_manager
+        self.vbox = vbox
         self.timer.timeout.connect(self.game_manager.printMouse)
     
     def testButton(self):
@@ -20,7 +21,7 @@ class frontUtils(QObject):
                              "font-family: Times New Roman;" 
                              "font-weight: bold;"
                              "color: white")
-        self.hbox.addWidget(button)
+        self.vbox.addWidget(button)
         button.clicked.connect(self.game_manager.buttonFunc)
 
     def mouseButton(self):
@@ -33,7 +34,7 @@ class frontUtils(QObject):
                              "font-family: Times New Roman;" 
                              "font-weight: bold;"
                              "color: white")
-        self.hbox.addWidget(button)
+        self.vbox.addWidget(button)
         button.toggled.connect(self.mouseLoc)
             
     def mouseLoc(self, state):
