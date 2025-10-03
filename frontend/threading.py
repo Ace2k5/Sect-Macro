@@ -16,7 +16,7 @@ class Worker(QObject):
         self.template_filename = None
         self.rect = None
         
-    def setup(self, proc, filename, rect):
+    def setup(self, proc, filename: str, rect: tuple):
         self.img_proc = proc
         self.template_filename = filename
         self.rect = rect
@@ -25,14 +25,12 @@ class Worker(QObject):
         try:
             if self.img_proc and self.template_filename and self.rect:
                 with mss() as sct:
-                    self.img_proc.mss = sct
-                    self.img_proc.mon_region = sct.monitors[1]
-                    location = self.img_proc.both_methods(self.template_filename, self.rect, self.img_proc.mss)
+                    location = self.img_proc.both_methods(self.template_filename, self.rect, sct)
                 if location:
                     self.location_found.emit(location)
                 self.progress.emit(location)
             else:
-                print("Workern not init properly.")
+                print("Worker not init properly.")
         except Exception as e:
             self.progress.emit(None)
         finally:

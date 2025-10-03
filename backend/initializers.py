@@ -6,6 +6,7 @@ game_configs = {
         "resolution": (800, 600),
         "window_title": "Roblox",
         "game_images": "guardians"
+        "strategies"
     },
     "anime_vanguards": {
         "display_name": "Anime Vanguards",

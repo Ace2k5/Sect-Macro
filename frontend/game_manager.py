@@ -140,7 +140,8 @@ class gameManager(QObject):
     def buttonFunc(self):
         current_roblox_rect = win32gui.GetWindowRect(self.hwnd)
         self.start_worker(self.template_match, "sjw.png", current_roblox_rect)
-        self.click(self.location)
+        if self.location:
+            self.click(self.location)
         
     
         
