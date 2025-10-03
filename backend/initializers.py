@@ -5,8 +5,11 @@ game_configs = {
         "display_name": "Anime Guardians",
         "resolution": (800, 600),
         "window_title": "Roblox",
-        "game_images": "guardians"
-        "strategies"
+        "game_images": "guardians",
+        "gamemode": {
+            "summer": "summer_event",
+            "inf": "infinite"
+        }
     },
     "anime_vanguards": {
         "display_name": "Anime Vanguards",
@@ -21,6 +24,7 @@ game_configs = {
         "game_images": "crusaders"
     }
 }
+
 qt = {
     "qt_default_resolution": (1000, 800),
     "roblox_container_res": (820, 640),
