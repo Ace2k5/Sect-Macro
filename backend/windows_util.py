@@ -2,29 +2,19 @@ import pyautogui
 import win32gui
 import win32con
 
-def initWindow(title: str):
+def initWindow(title: str) -> int:
     '''
     simply grabs hwnd of screen which is based on initializers. (implementation location is in setupRobloxIntegration)
     steps:
     1. grab hwnd from the arg
-    2. re-do 5 times if not located because it's either application is not open or window cannot find the handle
-    3. return hwnd
+    2. return hwnd
     '''
     hwnd = win32gui.FindWindow(None, title)
-    attempts = 0
-    if hwnd is None:
-        print("Cannot find Roblox handle, redoing 5 times...")
-        for i in range(5):
-              hwnd = win32gui.FindWindow(None, title)
-              attempts += 1
-              if hwnd is not None:
-                  return hwnd
-        if attempts >= 5:
-            print("Check failed five times, check if Roblox is open.")
-            return None
+    if hwnd is None or hwnd == 0:
+        raise RuntimeError("Window not found.")
     return hwnd
 
-def resolutionMid(window_width: int, window_height: int):
+def resolutionMid(window_width: int, window_height: int) -> tuple:
     '''
     Centers the application in the middle of the monitor's screen resolution.
     steps:
@@ -37,13 +27,13 @@ def resolutionMid(window_width: int, window_height: int):
     '''
     screen_resolution = pyautogui.size()
     if window_width is None or window_height is None:
-        raise RuntimeError("Critical bug in windows_util, window_width or window_height is None.")
+        raise ValueError("Critical bug in windows_util, window_width or window_height is None.")
     x = (screen_resolution.width - window_width) // 2 # 1000x700 since roblox is at 800x600
     y = (screen_resolution.height- window_height) // 2 # this 1000x700 is primarily for the qt application
     center_coords = (x, y)
     return center_coords
 
-def setupattachWindow(hwnd, container, width: int, height: int): # attaches roblox window to qt application
+def setupattachWindow(hwnd, container: object, width: int, height: int): # attaches roblox window to qt application
         '''
         Removes borders and attaches to a GUI
         steps:
@@ -52,7 +42,7 @@ def setupattachWindow(hwnd, container, width: int, height: int): # attaches robl
         3. set the new style
         4. set it as a child of container(which comes from robloxwindows.py in the setupQt func)
         5. restore to prevent minimization
-        6. setwindowpos by grabbing hwnd(0), no need to insert after(1), set 0 to 0 so it fits in container(2) -
+        6. setwindowpos by grabbing hwnd, set 0 to 0 so it fits in container -
         - width and height(3,4), noZorder means no layering and check if frame has changed.
         '''
         current_style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)

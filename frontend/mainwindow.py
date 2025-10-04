@@ -76,7 +76,10 @@ class MainWindow(QMainWindow):
                 self.new_window = RobloxWindow.RobloxWindow(game_config)
                 self.new_window.show()
                 self.close()
-            except Exception:
+            except RuntimeError:
                 QTimer.singleShot(100, lambda: clicked_button.setText("Roblox is not open, please open Roblox..."))
-                QTimer.singleShot(2000, lambda:clicked_button.setText(original_message))
+                clicked_button.setText(original_message)
                 return
+            except Exception as e:
+                QTimer.singleShot(300, lambda: clicked_button.setText(f"An unknown error has occured as {e}."))
+                clicked_button.setText(original_message)

@@ -8,7 +8,7 @@ from pathlib import Path
 import win32api
 TITLE = "Sect v0.0.1"
 class gameManager(QObject):
-    def __init__(self, hbox, roblox_container, container, qt_window_handle, layout, game_config: dict):
+    def __init__(self, hbox: QHBoxLayout, roblox_container: tuple[int, int], container: QObject, qt_window_handle: int, layout: QVBoxLayout, game_config: dict):
         super().__init__()
         self.hbox = hbox
         self.game_config = game_config
@@ -27,9 +27,11 @@ class gameManager(QObject):
         sets up template_matching class
         '''
         self.game_images = self.game_config.get('game_images')
+        if self.game_images is None:
+            raise KeyError("The key type of game_config['game_images'] does not exist.")
         self.template_match = template_matching.ImageProcessor(self.game_images)
         
-    def click(self, location, hardlocation=None, rect=None):
+    def click(self, location: tuple, hardlocation: tuple[int,int]=None, rect=None):
         if location:
             clicks.left_click_location(location)
         if hardlocation and rect:
@@ -40,12 +42,13 @@ class gameManager(QObject):
         attaches roblox to qt and also gets the resolution from dict in initializers.py
         '''
         title = self.game_config.get("window_title")
+        if title is None:
+            raise KeyError("The key type of game_config['window_title'] does not exist.")
         print(title)
         self.game_res = self.game_config.get("resolution")
+        if self.game_res is None or self.game_res == 0:
+            raise KeyError("The key type of game_config['resolution'] does not exist.")
         self.hwnd = windows_util.initWindow(title)
-        if self.hwnd is None or self.hwnd == 0:
-            print("HWND is invalid.")
-            return
         
     def setupRobloxWindow(self):
         '''
@@ -55,6 +58,8 @@ class gameManager(QObject):
         setupattachWindow requires 4 params: hwnd, size of container, width and height
         '''
         x, y = self.roblox_container
+        if x is None or y is None:
+            raise ValueError("roblox_container must be a tuple of (width, height)")
         self.container.setFixedSize(x, y)
         self.final_container = windows_util.setupattachWindow(self.hwnd, self.container, self.game_res[0], self.game_res[1])
         self.final_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -69,11 +74,12 @@ class gameManager(QObject):
 # --------------------------SETUP-------------------------------------- #
 
 # ------------------------- THREAD ------------------------------- #
-    def handle_location_found(self, location):
+    def handle_location_found(self, location: tuple[int, int]):
         print(f"Found location in: {location}")
         self.location = location
+        self.click(location)
         
-    def start_worker(self, template_match, template_filename, rect):
+    def start_worker(self, template_match: template_matching.ImageProcessor, template_filename: str, rect: tuple):
         self.template_thread = QThread()
         self.template_worker = threading.Worker()
         self.template_worker.setup(template_match, template_filename, rect)
@@ -95,7 +101,7 @@ class gameManager(QObject):
         print("Worker cleaned up.")
         
     # --------------------- DEBUG TOOLS --------------------- #
-    def _debugWindowInfo(self):
+    def _debugWindowInfo(self) -> None:
         ### --- DEBUG INFO --- ###
         print("=== Qt container ===")
         print("size:", self.final_container.size().width(), "x", self.final_container.size().height())
@@ -110,7 +116,7 @@ class gameManager(QObject):
         ### --- DEBUG INFO END --- ###
         
         
-    def printMouse(self):
+    def printMouse(self) -> None:
         '''
         this function gets the relative positioning of the roblox application. By subtracting the position of the cursor and the x and y of the application
         we are able to find where the roblox window is and check if it is outside the boundary
@@ -138,10 +144,11 @@ class gameManager(QObject):
                 print("Mouse is outside boundary.")
     
     def buttonFunc(self):
+        '''
+        testing connectivity between backend and frontend
+        '''
         current_roblox_rect = win32gui.GetWindowRect(self.hwnd)
         self.start_worker(self.template_match, "sjw.png", current_roblox_rect)
-        if self.location:
-            self.click(self.location)
         
     
         
