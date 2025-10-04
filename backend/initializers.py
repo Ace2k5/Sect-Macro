@@ -15,13 +15,19 @@ game_configs = {
         "display_name": "Anime Vanguards",
         "resolution": (800, 600),
         "window_title": "Roblox",
-        "game_images": "vanguards"
+        "game_images": "vanguards",
+        "gamemode": {
+            "inf" : "infinite"
+        }
     },
     "anime_crusaders": {
         "display_name": "Anime Crusaders",
         "resolution": (800,600),
         "window_title": "Roblox",
-        "game_images": "crusaders"
+        "game_images": "crusaders",
+        "gamemode": {
+            "inf": "infinite"
+        }
     }
 }
 

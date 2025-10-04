@@ -6,9 +6,10 @@ from . import threading, debug_utils
 import win32gui
 from pathlib import Path
 import win32api
+from abc import ABC, abstractmethod
 TITLE = "Sect v0.0.1"
-class gameManager(QObject):
-    def __init__(self, hbox: QHBoxLayout, roblox_container: tuple[int, int], container: QObject, qt_window_handle: int, layout: QVBoxLayout, game_config: dict):
+class GameManager(QObject):
+    def __init__(self, hbox: QHBoxLayout, roblox_container: tuple[int, int], container: QObject, qt_window_handle: int, layout: QVBoxLayout, game_config: dict, mode: str):
         super().__init__()
         self.hbox = hbox
         self.game_config = game_config
@@ -19,9 +20,20 @@ class gameManager(QObject):
         self.template_worker = None
         self.template_thread = None
         self.location = None
+        self.mode = mode
+        self.state_manager = self.gameInstance()
+        
         
 # --------------------------SETUP-------------------------------------- #
         
+    def gameInstance(self):
+        if self.mode == "summer":
+            from .guardians import summerEvent
+            return summerEvent(self.game_config, self.click)
+        if self.mode == "infinite":
+            from .guardians import infinite
+            return infinite(self.game_config, self.click)
+    
     def setupTemplateMatching(self):
         '''
         sets up template_matching class
@@ -76,8 +88,7 @@ class gameManager(QObject):
 # ------------------------- THREAD ------------------------------- #
     def handle_location_found(self, location: tuple[int, int]):
         print(f"Found location in: {location}")
-        self.location = location
-        self.click(location)
+        self.state_manager.updateLocation(location) 
         
     def start_worker(self, template_match: template_matching.ImageProcessor, template_filename: str, rect: tuple):
         self.template_thread = QThread()
@@ -99,7 +110,9 @@ class gameManager(QObject):
             self.template_thread.quit()
             self.template_thread.wait()
         print("Worker cleaned up.")
-        
+# ------------------------- THREAD ------------------------------- #
+
+
     # --------------------- DEBUG TOOLS --------------------- #
     def _debugWindowInfo(self) -> None:
         ### --- DEBUG INFO --- ###
@@ -153,4 +166,27 @@ class gameManager(QObject):
     
         
         
+class GameState(ABC):
+    def __init__(self, game_config: dict, click_function: clicks):
+        self.game_mode = game_config.get('gamemode')
+        self.location = None
+        self.game_config = game_config
+        self.click = click_function
+    
+    def initClicks(self, x: int, y: int):
+        self.click(x, y)
         
+    def updateLocation(self, location: tuple[int, int]):
+        self.location = location
+        self.clickLocation(self.location)
+        
+    def clickLocation(self, location: tuple[int, int]):
+        self.click(location)
+        
+    @abstractmethod
+    def initialGameClick(self):
+        pass
+    
+    @abstractmethod
+    def gameModeClick(self):
+        pass

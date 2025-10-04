@@ -14,15 +14,16 @@ TITLE = "Sect v0.0.1"
     Initializes and sets Qtapplication as the parent application where Roblox is the child and is attached to the Qtapplication 
 '''
 class RobloxWindow(QMainWindow):
-    def __init__(self, game_config: dict):
+    def __init__(self, game_config: dict, mode: str):
         super().__init__()
         self.game_config = game_config
+        self.mode = mode
         # Qt #
         self.setupQt()
         self.setupMainWindow()
         qt_window_handle = self.winId()
         # GAME MANAGER #
-        self.manager = game_manager.gameManager(self.hbox, self.roblox_container, self.container, qt_window_handle, self.layout, self.game_config)
+        self.manager = game_manager.GameManager(self.hbox, self.roblox_container, self.container, qt_window_handle, self.layout, self.game_config, mode)
         self.manager.setupRobloxIntegration()
         self.manager.setupTemplateMatching()
         self.manager.setupRobloxWindow()
