@@ -1,11 +1,7 @@
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QPushButton, QSizePolicy, QTextEdit)
-from PyQt5.QtCore import QTimer
-from backend import windows_util, template_matching, initializers
+                              QTextEdit)
+from backend import windows_util, initializers
 from . import threading, debug_utils, game_manager
-import win32gui
-from pathlib import Path
-import win32api
 
 #temporary consts
 TITLE = "Sect v0.0.1"
@@ -14,21 +10,26 @@ TITLE = "Sect v0.0.1"
     Initializes and sets Qtapplication as the parent application where Roblox is the child and is attached to the Qtapplication 
 '''
 class RobloxWindow(QMainWindow):
-    def __init__(self, game_config: dict, mode: str):
+    def __init__(self, game_config: dict, mode: str, log_window: object):
         super().__init__()
         self.game_config = game_config
         self.mode = mode
+        # LOGGER #
+        self.logger = log_window
         # Qt #
         self.setupQt()
         self.setupMainWindow()
         qt_window_handle = self.winId()
         # GAME MANAGER #
-        self.manager = game_manager.GameManager(self.hbox, self.roblox_container, self.container, qt_window_handle, self.layout, self.game_config, mode)
+        self.manager = game_manager.GameManager(self.hbox, self.roblox_container, self.container,
+                                                qt_window_handle, self.layout, self.game_config, self.mode,
+                                                self.logger)
         self.manager.setupRobloxIntegration()
         self.manager.setupTemplateMatching()
         self.manager.setupRobloxWindow()
         # DEV TOOLS #
         self.setupDebugControls()
+        self.remove_logger_borders()
         
     def setupQt(self):
         '''
@@ -44,12 +45,24 @@ class RobloxWindow(QMainWindow):
         self.qt_res = initializers.qt.get("qt_default_resolution")
         self.roblox_container = initializers.qt.get("roblox_container_res")
 
-    def setupLogs(self, game_config: str): # specialized game configs should have a set function in the future.
-        self.threadUpdate = threading.attachedWindow(game_config)
-        self.log_box = QTextEdit()
-        self.log_box.setReadOnly(True)
-        self.hbox.addWidget(self.log_box)
-        self.setGeometry()
+    def remove_logger_borders(self):
+        """Remove title bar and borders from logger window"""
+        if hasattr(self.logger, 'winId'):
+            logger_hwnd = self.logger.winId()
+            if logger_hwnd:
+                import win32gui
+                import win32con
+                
+                current_style = win32gui.GetWindowLong(logger_hwnd, win32con.GWL_STYLE)
+                new_style = current_style & ~(
+                    win32con.WS_MINIMIZEBOX | 
+                    win32con.WS_MAXIMIZEBOX | 
+                    win32con.WS_SYSMENU
+                )
+                win32gui.SetWindowLong(logger_hwnd, win32con.GWL_STYLE, new_style)
+                win32gui.SetWindowPos(logger_hwnd, None, 0, 0, 0, 0,
+                                    win32con.SWP_NOMOVE | win32con.SWP_NOSIZE | 
+                                    win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED)
 
     def setupMainWindow(self):
         '''
@@ -78,4 +91,6 @@ class RobloxWindow(QMainWindow):
         safely de-attaches roblox from qt
         '''
         self.manager.deattachWindow()
+        if self.logger:
+            self.logger.close()
         super().closeEvent(event)

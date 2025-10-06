@@ -1,15 +1,16 @@
-from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QPushButton, QSizePolicy, QTextEdit)
-from PyQt5.QtCore import QTimer, QObject, QThread
-from backend import windows_util, template_matching, initializers, clicks
-from . import threading, debug_utils
+from PyQt5.QtWidgets import ( QVBoxLayout, QHBoxLayout,
+                             QPushButton, QSizePolicy)
+from PyQt5.QtCore import QObject, QThread
+from backend import windows_util, template_matching, clicks
+from . import threading
 import win32gui
-from pathlib import Path
 import win32api
 from abc import ABC, abstractmethod
 TITLE = "Sect v0.0.1"
 class GameManager(QObject):
-    def __init__(self, hbox: QHBoxLayout, roblox_container: tuple[int, int], container: QObject, qt_window_handle: int, layout: QVBoxLayout, game_config: dict, mode: str):
+    def __init__(self, hbox: QHBoxLayout, roblox_container: tuple[int, int],
+                 container: QObject, qt_window_handle: int, layout: QVBoxLayout,
+                 game_config: dict, mode: str, log_window: object):
         super().__init__()
         self.hbox = hbox
         self.game_config = game_config
@@ -22,6 +23,7 @@ class GameManager(QObject):
         self.location = None
         self.mode = mode
         self.state_manager = self.gameInstance()
+        self.logger = log_window
         
         
 # --------------------------SETUP-------------------------------------- #
@@ -87,10 +89,24 @@ class GameManager(QObject):
 
 # ------------------------- THREAD ------------------------------- #
     def handle_location_found(self, location: tuple[int, int]):
+        '''
+        params:
+        location -> tuple [int, int]
+
+        this code handles the location emitted and referenced by the thread worker
+        '''
         print(f"Found location in: {location}")
         self.state_manager.updateLocation(location) 
         
     def start_worker(self, template_match: template_matching.ImageProcessor, template_filename: str, rect: tuple):
+        '''
+        params:
+        template matching -> object
+        template filname -> str
+        rect(window x,y,w,h) -> tuple
+
+        uses parallelism for template-matching so the gui doesn't freeze
+        '''
         self.template_thread = QThread()
         self.template_worker = threading.Worker()
         self.template_worker.setup(template_match, template_filename, rect)
@@ -167,6 +183,13 @@ class GameManager(QObject):
         
         
 class GameState(ABC):
+    '''
+    params:
+    game config -> dict (to access modes)
+
+    an abstract class methods for multiple modes
+    '''
+
     def __init__(self, game_config: dict, click_function: clicks):
         self.game_mode = game_config.get('gamemode')
         self.location = None

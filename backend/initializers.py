@@ -32,7 +32,12 @@ game_configs = {
 }
 
 qt = {
-    "qt_default_resolution": (1000, 800),
+    "qt_default_resolution": (1000, 700),
     "roblox_container_res": (820, 640),
-    "worker_container_res": (200, 200)
+    "worker_container_res": (200, 200),
+    "logging": {
+        "logging_res": (400, 600),
+        "debug_box": (200, 300),
+        "logging_box": (200, 300)
+    }
 }
