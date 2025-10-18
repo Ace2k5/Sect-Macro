@@ -21,7 +21,7 @@ class Worker(QObject):
         self.template_filename = filename
         self.rect = rect
 
-    def run(self, sleep=1): # sleep should depend on a txt file in the future...
+    def run(self): # sleep should depend on a txt file in the future...
         try:
             if self.img_proc and self.template_filename and self.rect:
                 with mss() as sct:

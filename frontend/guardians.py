@@ -1,12 +1,31 @@
-from .game_manager import GameState
+from backend import clicks
+'''
+important:
+self.template_matching only requires the template_filename.
+'''
 
-class summerEvent(GameState):
+
+class summerEvent():
+    def __init__(self, game_config, prefilled_temp_match, handle_location):
+        self.location = None
+        self.game_config = game_config
+        self.template_matching = prefilled_temp_match
+        self.handle_location = handle_location
+        self.location = None
+
     def initialGameClick(self):
         print("Test")
     def gameModeClick(self):
         print("test")
     
-class infinite(GameState):
+class infinite():
+    def __init__(self, game_config, prefilled_temp_match, handle_location):
+        self.location = None
+        self.game_config = game_config
+        self.template_matching = prefilled_temp_match
+        self.handle_location = handle_location
+        self.location = None
+
     def initialGameClick(self):
         print("Test")
     

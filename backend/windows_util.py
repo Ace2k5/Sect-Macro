@@ -45,6 +45,10 @@ def setupattachWindow(hwnd, container: object, width: int, height: int): # attac
         6. setwindowpos by grabbing hwnd, set 0 to 0 so it fits in container -
         - width and height(3,4), noZorder means no layering and check if frame has changed.
         '''
+        if hwnd is None:
+             print(f"HWND problem in setupattachWindow {hwnd}")
+        if container is None:
+             print(f"Container problem in setupattachWindow {container}")
         current_style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
         new_window_style_flags = current_style & ~(
             win32con.WS_CAPTION | 
@@ -70,6 +74,9 @@ def removeParent(hwnd, width: int, height: int): # removes parent qt, restore ba
     6. show window to user
     7. center the window and flag that the screen has changed.
     '''
+    if hwnd is None:
+         print(f"HWND: {hwnd}, problem.")
+
     x, y = resolutionMid(width, height)
     win32gui.SetParent(hwnd, None)
     current_style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)

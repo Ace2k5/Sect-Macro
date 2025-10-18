@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                              QTextEdit)
+from PyQt5.QtWidgets import ( QVBoxLayout, QHBoxLayout,
+                            QPushButton, QSizePolicy, QWidget, QMainWindow)
 from backend import windows_util, initializers
 from . import threading, debug_utils, game_manager
 
@@ -20,13 +20,14 @@ class RobloxWindow(QMainWindow):
         self.setupQt()
         self.setupMainWindow()
         qt_window_handle = self.winId()
-        # GAME MANAGER #
+        # SETUP #
         self.manager = game_manager.GameManager(self.hbox, self.roblox_container, self.container,
                                                 qt_window_handle, self.layout, self.game_config, self.mode,
                                                 self.logger)
-        self.manager.setupRobloxIntegration()
-        self.manager.setupTemplateMatching()
-        self.manager.setupRobloxWindow()
+        self.game_res = self.manager.game_res
+        self.hwnd = self.manager.hwnd
+        self.setupRobloxWindow()
+        self.setupModeButtons()
         # DEV TOOLS #
         self.setupDebugControls()
         self.remove_logger_borders()
@@ -44,6 +45,41 @@ class RobloxWindow(QMainWindow):
         self.layout.addLayout(self.hbox)
         self.qt_res = initializers.qt.get("qt_default_resolution")
         self.roblox_container = initializers.qt.get("roblox_container_res")
+        
+    def setupModeButtons(self):
+        '''
+        Button for current available mode
+        '''
+
+        game_modes = self.game_config.get("gamemode")
+        if self.mode in game_modes:
+            button = QPushButton(self.mode)
+            button.setStyleSheet("font-size: 30px;" \
+                            "font-family: Times New Roman;" 
+                            "font-weight: bold;"
+                            "color: white;"
+                            )
+            button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.layout.addWidget(button)
+
+    def setupRobloxWindow(self):
+        '''
+        Attachment of the roblox container to Qt GUI:
+        roblox_container comes from setupQt
+        hwnd comes from setupRobloxIntegration
+        setupattachWindow requires 4 params: hwnd, size of container, width and height
+        '''
+
+        x, y = self.roblox_container
+        if x is None or y is None:
+            raise ValueError("roblox_container must be a tuple of (width, height)")
+        self.container.setFixedSize(x, y)
+        self.final_container = windows_util.setupattachWindow(self.hwnd, self.container, self.game_res[0], self.game_res[1])   
+        self.layout.addWidget(self.final_container)
+        self.manager._debugWindowInfo()
+    
+    def deattachWindow(self):
+        windows_util.removeParent(self.hwnd, self.game_res[0], self.game_res[1])
 
     def remove_logger_borders(self):
         """
@@ -91,7 +127,7 @@ class RobloxWindow(QMainWindow):
         '''
         safely de-attaches roblox from qt
         '''
-        self.manager.deattachWindow()
+        self.deattachWindow()
         if self.logger:
             self.logger.close()
         super().closeEvent(event)

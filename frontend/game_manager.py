@@ -1,11 +1,11 @@
 from PyQt5.QtWidgets import ( QVBoxLayout, QHBoxLayout,
                              QPushButton, QSizePolicy)
 from PyQt5.QtCore import QObject, QThread
-from backend import windows_util, template_matching, clicks
+from backend import windows_util, template_matching
 from . import threading
 import win32gui
 import win32api
-from abc import ABC, abstractmethod
+from functools import partial
 TITLE = "Sect v0.0.1"
 class GameManager(QObject):
     def __init__(self, hbox: QHBoxLayout, roblox_container: tuple[int, int],
@@ -17,41 +17,39 @@ class GameManager(QObject):
         self.roblox_container = roblox_container
         self.container = container
         self.qt_hwnd = qt_window_handle
-        self.layout = layout
+        self.vbox = layout
         self.template_worker = None
         self.template_thread = None
         self.location = None
         self.mode = mode
+        self.hwnd = self.setupHWND()
+        self.game_res = self.setupRobloxIntegration()
+        self.setupTemplateMatching()
         self.state_manager = self.gameInstance()
         self.logger = log_window
-        self.setupModeButtons()
+        self.final_container = windows_util.setupattachWindow(self.hwnd, self.container, self.game_res[0], self.game_res[1])  
         
         
 # --------------------------SETUP-------------------------------------- #
         
     def gameInstance(self):
+        '''
+        creates instance of the chosen mode in mainwindow.py
+        '''
+        #prefill worker so we only need template_filename for easy access
+        prefilled_temp_match = partial(self.start_worker, template_match=self.template_match, rect=win32gui.GetWindowRect(self.hwnd))
         if self.mode == "summer":
             from .guardians import summerEvent
-            return summerEvent(self.game_config, self.click)
+            return summerEvent(self.game_config, prefilled_temp_match, self.handle_location_found)
         if self.mode == "infinite":
             from .guardians import infinite
-            return infinite(self.game_config, self.click)
-    
-    def setupModeButtons(self):
-        '''
-        Button for current available mode
-        '''
+            return infinite(self.game_config, prefilled_temp_match, self.handle_location_found)
 
-        game_modes = self.game_config.get("gamemode")
-        if self.mode in game_modes:
-            button = QPushButton(self.mode)
-            button.setStyleSheet("font-size: 30px;" \
-                            "font-family: Times New Roman;" 
-                            "font-weight: bold;"
-                            "color: white;"
-                            )
-        self.hbox.addWidget(button)
 
+    def setupHWND(self):
+        self.title = self.game_config.get("window_title")
+        self.hwnd = windows_util.initWindow(self.title)
+        return self.hwnd
 
     def setupTemplateMatching(self):
         '''
@@ -59,48 +57,20 @@ class GameManager(QObject):
         '''
         self.game_images = self.game_config.get('game_images')
         if self.game_images is None:
-            raise KeyError("The key type of game_config['game_images'] does not exist.")
+            raise KeyError(f"The key type of game_config[{self.game_images}] does not exist.")
         self.template_match = template_matching.ImageProcessor(self.game_images)
-        
-    def click(self, location: tuple, hardlocation: tuple[int,int]=None, rect=None):
-        if location:
-            clicks.left_click_location(location)
-        if hardlocation and rect:
-            clicks.left_hardcoded_clicks(hardlocation, rect)
         
     def setupRobloxIntegration(self):
         '''
         attaches roblox to qt and also gets the resolution from dict in initializers.py
         '''
-        title = self.game_config.get("window_title")
-        if title is None:
-            raise KeyError(f"The key type of game_config['{title}'] does not exist.")
-        print(title)
+        if self.title is None:
+            raise KeyError(f"The key type of game_config['{self.title}'] does not exist.")
+        print(self.title)
         self.game_res = self.game_config.get("resolution")
         if self.game_res is None or self.game_res == 0:
             raise KeyError(f"The key type of game_config['{self.game_res}'] does not exist.")
-        self.hwnd = windows_util.initWindow(title)
-        
-    def setupRobloxWindow(self):
-        '''
-        Attachment of the roblox container to Qt GUI:
-        roblox_container comes from setupQt
-        hwnd comes from setupRobloxIntegration
-        setupattachWindow requires 4 params: hwnd, size of container, width and height
-        '''
-        x, y = self.roblox_container
-        if x is None or y is None:
-            raise ValueError("roblox_container must be a tuple of (width, height)")
-        self.container.setFixedSize(x, y)
-        self.final_container = windows_util.setupattachWindow(self.hwnd, self.container, self.game_res[0], self.game_res[1])
-        self.final_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        
-        self.hbox.addWidget(self.final_container)
-        
-        self._debugWindowInfo()
-        
-    def deattachWindow(self):
-        windows_util.removeParent(self.hwnd, self.game_res[0], self.game_res[1])
+        return self.game_res
         
 # --------------------------SETUP-------------------------------------- #
 
@@ -113,7 +83,7 @@ class GameManager(QObject):
         this code handles the location emitted and referenced by the thread worker
         '''
         print(f"Found location in: {location}")
-        self.state_manager.updateLocation(location) 
+        self.location.updateLocation(location) 
         
     def start_worker(self, template_match: template_matching.ImageProcessor, template_filename: str, rect: tuple):
         '''
@@ -126,7 +96,9 @@ class GameManager(QObject):
         '''
         self.template_thread = QThread()
         self.template_worker = threading.Worker()
-        self.template_worker.setup(template_match, template_filename, rect)
+
+        # prefill args so only filename is required
+        self.template_worker.setup(self.template_match, template_filename, win32gui.GetWindowRect(self.hwnd))
         self.template_worker.moveToThread(self.template_thread)
         
         self.template_worker.location_found.connect(self.handle_location_found)
@@ -195,38 +167,3 @@ class GameManager(QObject):
         '''
         current_roblox_rect = win32gui.GetWindowRect(self.hwnd)
         self.start_worker(self.template_match, "sjw.png", current_roblox_rect)
-        
-    
-        
-        
-class GameState(ABC):
-    '''
-    params:
-    game config -> dict (to access modes)
-
-    an abstract class methods for multiple modes
-    '''
-
-    def __init__(self, game_config: dict, click_function: clicks):
-        self.game_mode = game_config.get('gamemode')
-        self.location = None
-        self.game_config = game_config
-        self.click = click_function
-    
-    def initClicks(self, x: int, y: int):
-        self.click(x, y)
-        
-    def updateLocation(self, location: tuple[int, int]):
-        self.location = location
-        self.clickLocation(self.location)
-        
-    def clickLocation(self, location: tuple[int, int]):
-        self.click(location)
-        
-    @abstractmethod
-    def initialGameClick(self):
-        pass
-    
-    @abstractmethod
-    def gameModeClick(self):
-        pass
