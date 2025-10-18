@@ -46,7 +46,9 @@ class RobloxWindow(QMainWindow):
         self.roblox_container = initializers.qt.get("roblox_container_res")
 
     def remove_logger_borders(self):
-        """Remove title bar and borders from logger window"""
+        """
+        Remove title bar and borders from logger window
+        """
         if hasattr(self.logger, 'winId'):
             logger_hwnd = self.logger.winId()
             if logger_hwnd:
@@ -56,8 +58,7 @@ class RobloxWindow(QMainWindow):
                 current_style = win32gui.GetWindowLong(logger_hwnd, win32con.GWL_STYLE)
                 new_style = current_style & ~(
                     win32con.WS_MINIMIZEBOX | 
-                    win32con.WS_MAXIMIZEBOX | 
-                    win32con.WS_SYSMENU
+                    win32con.WS_MAXIMIZEBOX
                 )
                 win32gui.SetWindowLong(logger_hwnd, win32con.GWL_STYLE, new_style)
                 win32gui.SetWindowPos(logger_hwnd, None, 0, 0, 0, 0,

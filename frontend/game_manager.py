@@ -24,6 +24,7 @@ class GameManager(QObject):
         self.mode = mode
         self.state_manager = self.gameInstance()
         self.logger = log_window
+        self.setupModeButtons()
         
         
 # --------------------------SETUP-------------------------------------- #
@@ -36,6 +37,22 @@ class GameManager(QObject):
             from .guardians import infinite
             return infinite(self.game_config, self.click)
     
+    def setupModeButtons(self):
+        '''
+        Button for current available mode
+        '''
+
+        game_modes = self.game_config.get("gamemode")
+        if self.mode in game_modes:
+            button = QPushButton(self.mode)
+            button.setStyleSheet("font-size: 30px;" \
+                            "font-family: Times New Roman;" 
+                            "font-weight: bold;"
+                            "color: white;"
+                            )
+        self.hbox.addWidget(button)
+
+
     def setupTemplateMatching(self):
         '''
         sets up template_matching class
@@ -57,11 +74,11 @@ class GameManager(QObject):
         '''
         title = self.game_config.get("window_title")
         if title is None:
-            raise KeyError("The key type of game_config['window_title'] does not exist.")
+            raise KeyError(f"The key type of game_config['{title}'] does not exist.")
         print(title)
         self.game_res = self.game_config.get("resolution")
         if self.game_res is None or self.game_res == 0:
-            raise KeyError("The key type of game_config['resolution'] does not exist.")
+            raise KeyError(f"The key type of game_config['{self.game_res}'] does not exist.")
         self.hwnd = windows_util.initWindow(title)
         
     def setupRobloxWindow(self):
