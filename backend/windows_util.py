@@ -11,7 +11,7 @@ def initWindow(title: str) -> int:
     '''
     hwnd = win32gui.FindWindow(None, title)
     if hwnd is None or hwnd == 0:
-        raise RuntimeError("Window not found.")
+        raise RuntimeError(f"Window not found, HWND is: {hwnd}")
     return hwnd
 
 def resolutionMid(window_width: int, window_height: int) -> tuple:
@@ -27,7 +27,7 @@ def resolutionMid(window_width: int, window_height: int) -> tuple:
     '''
     screen_resolution = pyautogui.size()
     if window_width is None or window_height is None:
-        raise ValueError("Critical bug in windows_util, window_width or window_height is None.")
+        raise ValueError(f"Critical bug in windows_util, window_width or window_height is None: {window_height}, {window_width}")
     x = (screen_resolution.width - window_width) // 2 # 1000x700 since roblox is at 800x600
     y = (screen_resolution.height- window_height) // 2 # this 1000x700 is primarily for the qt application
     center_coords = (x, y)
@@ -46,9 +46,9 @@ def setupattachWindow(hwnd, container: object, width: int, height: int): # attac
         - width and height(3,4), noZorder means no layering and check if frame has changed.
         '''
         if hwnd is None:
-             print(f"HWND problem in setupattachWindow {hwnd}")
+             raise ValueError(f"HWND problem in setupattachWindow {hwnd}")
         if container is None:
-             print(f"Container problem in setupattachWindow {container}")
+             raise RuntimeError(f"Container problem in setupattachWindow {container}")
         current_style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
         new_window_style_flags = current_style & ~(
             win32con.WS_CAPTION | 
@@ -75,7 +75,7 @@ def removeParent(hwnd, width: int, height: int): # removes parent qt, restore ba
     7. center the window and flag that the screen has changed.
     '''
     if hwnd is None:
-         print(f"HWND: {hwnd}, problem.")
+        raise ValueError(f"HNWD problem in removeParent: {hwnd}")
 
     x, y = resolutionMid(width, height)
     win32gui.SetParent(hwnd, None)

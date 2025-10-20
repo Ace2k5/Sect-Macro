@@ -87,6 +87,7 @@ class MainWindow(QMainWindow):
                 self.new_window = RobloxWindow.RobloxWindow(game_config, mode, self.new_log_window)
                 self.new_window.show()
                 self.new_log_window.show()
+                self.new_log_window.hide()
                 self.close()
             except RuntimeError:
                 QTimer.singleShot(100, lambda: clicked_button.setText("Roblox is not open, please open Roblox..."))

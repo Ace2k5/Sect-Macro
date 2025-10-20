@@ -10,24 +10,39 @@ TITLE = "Sect v0.0.1"
 class GameManager(QObject):
     def __init__(self, hbox: QHBoxLayout, roblox_container: tuple[int, int],
                  container: QObject, qt_window_handle: int, layout: QVBoxLayout,
-                 game_config: dict, mode: str, log_window: object):
+                 game_config: dict, mode: str, logger_button: object, logger_instance: object):
         super().__init__()
+        # Qt
         self.hbox = hbox
         self.game_config = game_config
         self.roblox_container = roblox_container
         self.container = container
         self.qt_hwnd = qt_window_handle
         self.vbox = layout
+        #
+
+        # Thread worker
         self.template_worker = None
         self.template_thread = None
         self.location = None
+        #
+
+        # instance setup
+        #prefill worker so we only need template_filename for easy access
+        self.prefilled_temp_match = lambda template_filename: self.start_worker(
+            template_match=self.template_match,
+            template_filename=template_filename,
+            rect=win32gui.GetWindowRect(self.hwnd))
         self.mode = mode
         self.hwnd = self.setupHWND()
         self.game_res = self.setupRobloxIntegration()
         self.setupTemplateMatching()
         self.state_manager = self.gameInstance()
-        self.logger = log_window
-        self.final_container = windows_util.setupattachWindow(self.hwnd, self.container, self.game_res[0], self.game_res[1])  
+        self.logger_instance = logger_instance
+        self.logger_button = logger_button
+        self.logger_button.clicked.connect(self.loggerShow)
+        self.final_container = windows_util.setupattachWindow(self.hwnd, self.container, self.game_res[0], self.game_res[1])
+        #
         
         
 # --------------------------SETUP-------------------------------------- #
@@ -36,14 +51,12 @@ class GameManager(QObject):
         '''
         creates instance of the chosen mode in mainwindow.py
         '''
-        #prefill worker so we only need template_filename for easy access
-        prefilled_temp_match = partial(self.start_worker, template_match=self.template_match, rect=win32gui.GetWindowRect(self.hwnd))
         if self.mode == "summer":
             from .guardians import summerEvent
-            return summerEvent(self.game_config, prefilled_temp_match, self.handle_location_found)
+            return summerEvent(self.game_config, self.prefilled_temp_match, self.handle_location_found)
         if self.mode == "infinite":
             from .guardians import infinite
-            return infinite(self.game_config, prefilled_temp_match, self.handle_location_found)
+            return infinite(self.game_config, self.prefilled_temp_match, self.handle_location_found)
 
 
     def setupHWND(self):
@@ -82,8 +95,9 @@ class GameManager(QObject):
 
         this code handles the location emitted and referenced by the thread worker
         '''
-        print(f"Found location in: {location}")
-        self.location.updateLocation(location) 
+        if location:
+            print(f"Found location in: {location}")
+            # log shit
         
     def start_worker(self, template_match: template_matching.ImageProcessor, template_filename: str, rect: tuple):
         '''
@@ -94,21 +108,24 @@ class GameManager(QObject):
 
         uses parallelism for template-matching so the gui doesn't freeze
         '''
-        self.template_thread = QThread()
-        self.template_worker = threading.Worker()
+        if self.template_thread and self.template_thread.isRunning():
+            return
+        else:
+            self.template_thread = QThread()
+            self.template_worker = threading.Worker()
 
-        # prefill args so only filename is required
-        self.template_worker.setup(self.template_match, template_filename, win32gui.GetWindowRect(self.hwnd))
-        self.template_worker.moveToThread(self.template_thread)
-        
-        self.template_worker.location_found.connect(self.handle_location_found)
-        
-        self.template_worker.finished.connect(self.template_thread.quit)
-        self.template_worker.finished.connect(self.template_worker.deleteLater)
-        self.template_thread.finished.connect(self.template_thread.deleteLater)
-        
-        self.template_thread.started.connect(self.template_worker.run)
-        self.template_thread.start()
+            # args for this are prefilled using a lambda function
+            self.template_worker.setup(template_match, template_filename, rect)
+            self.template_worker.moveToThread(self.template_thread)
+            
+            self.template_worker.location_found.connect(self.handle_location_found)
+            
+            self.template_worker.finished.connect(self.template_thread.quit)
+            self.template_worker.finished.connect(self.template_worker.deleteLater)
+            self.template_thread.finished.connect(self.template_thread.deleteLater)
+            
+            self.template_thread.started.connect(self.template_worker.run)
+            self.template_thread.start()
         
     def cleanupWorker(self):
         if self.template_thread and self.template_thread.isRunning():
@@ -117,6 +134,15 @@ class GameManager(QObject):
         print("Worker cleaned up.")
 # ------------------------- THREAD ------------------------------- #
 
+# ----------------------- CALLABLES ----------------------- #
+
+    def loggerShow(self):
+        if self.logger_instance.isVisible():
+            self.logger_instance.hide()
+            self.logger_button.setText("Show Logger")
+        else:
+            self.logger_instance.show()
+            self.logger_button.setText("Hide Logger")
 
     # --------------------- DEBUG TOOLS --------------------- #
     def _debugWindowInfo(self) -> None:

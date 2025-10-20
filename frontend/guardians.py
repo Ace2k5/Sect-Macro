@@ -7,7 +7,6 @@ self.template_matching only requires the template_filename.
 
 class summerEvent():
     def __init__(self, game_config, prefilled_temp_match, handle_location):
-        self.location = None
         self.game_config = game_config
         self.template_matching = prefilled_temp_match
         self.handle_location = handle_location
@@ -20,7 +19,6 @@ class summerEvent():
     
 class infinite():
     def __init__(self, game_config, prefilled_temp_match, handle_location):
-        self.location = None
         self.game_config = game_config
         self.template_matching = prefilled_temp_match
         self.handle_location = handle_location

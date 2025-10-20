@@ -12,25 +12,36 @@ TITLE = "Sect v0.0.1"
 class RobloxWindow(QMainWindow):
     def __init__(self, game_config: dict, mode: str, log_window: object):
         super().__init__()
+        # IMPORTANT #
         self.game_config = game_config
         self.mode = mode
+        # 
+
         # LOGGER #
         self.logger = log_window
-        # Qt #
+        #
+
+        # Qt 
         self.setupQt()
         self.setupMainWindow()
         qt_window_handle = self.winId()
-        # SETUP #
+        #
+
+        # SETUP
+        self.logger_button = self.setupToggleLogger()
         self.manager = game_manager.GameManager(self.hbox, self.roblox_container, self.container,
                                                 qt_window_handle, self.layout, self.game_config, self.mode,
-                                                self.logger)
+                                                self.logger_button, self.logger)
         self.game_res = self.manager.game_res
         self.hwnd = self.manager.hwnd
         self.setupRobloxWindow()
         self.setupModeButtons()
-        # DEV TOOLS #
+        #
+
+        # DEV TOOLS
         self.setupDebugControls()
         self.remove_logger_borders()
+        #
         
     def setupQt(self):
         '''
@@ -45,7 +56,26 @@ class RobloxWindow(QMainWindow):
         self.layout.addLayout(self.hbox)
         self.qt_res = initializers.qt.get("qt_default_resolution")
         self.roblox_container = initializers.qt.get("roblox_container_res")
-        
+
+        # second boxes
+
+        self.vbox2 = QVBoxLayout()
+        self.hbox.addLayout(self.vbox2)
+    
+    def setupToggleLogger(self):
+        '''
+        Button to showcase logs
+        '''
+        button = QPushButton("Show Logger")
+        button.setStyleSheet("font-size: 30px;" \
+                            "font-family: Times New Roman;" 
+                            "font-weight: bold;"
+                            "color: white;"
+                            )
+        button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.vbox2.addWidget(button)
+        return button
+
     def setupModeButtons(self):
         '''
         Button for current available mode
@@ -59,8 +89,8 @@ class RobloxWindow(QMainWindow):
                             "font-weight: bold;"
                             "color: white;"
                             )
-            button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.layout.addWidget(button)
+            button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.vbox2.addWidget(button)
 
     def setupRobloxWindow(self):
         '''
@@ -75,7 +105,7 @@ class RobloxWindow(QMainWindow):
             raise ValueError("roblox_container must be a tuple of (width, height)")
         self.container.setFixedSize(x, y)
         self.final_container = windows_util.setupattachWindow(self.hwnd, self.container, self.game_res[0], self.game_res[1])   
-        self.layout.addWidget(self.final_container)
+        self.hbox.addWidget(self.final_container)
         self.manager._debugWindowInfo()
     
     def deattachWindow(self):
@@ -94,7 +124,8 @@ class RobloxWindow(QMainWindow):
                 current_style = win32gui.GetWindowLong(logger_hwnd, win32con.GWL_STYLE)
                 new_style = current_style & ~(
                     win32con.WS_MINIMIZEBOX | 
-                    win32con.WS_MAXIMIZEBOX
+                    win32con.WS_MAXIMIZEBOX |
+                    win32con.WS_SYSMENU
                 )
                 win32gui.SetWindowLong(logger_hwnd, win32con.GWL_STYLE, new_style)
                 win32gui.SetWindowPos(logger_hwnd, None, 0, 0, 0, 0,
@@ -116,12 +147,9 @@ class RobloxWindow(QMainWindow):
         '''
         for debugging window, checking template_matching and all other stuff.
         '''
-        self.debug = debug_utils.frontUtils(self.hbox, self.main_widget, self.manager, self.layout)
+        self.debug = debug_utils.frontUtils(self.hbox, self.main_widget, self.manager, self.layout, self.vbox2)
         self.debug.testButton()
         self.debug.mouseButton()
-        
-    def setupThreading(self):
-        self.thread = threading.attachedWindow(None, self.layout)
         
     def closeEvent(self, event):
         '''

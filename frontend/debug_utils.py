@@ -6,7 +6,7 @@ import win32gui
 from pathlib import Path
 import win32api
 class frontUtils(QObject):
-    def __init__(self, hbox, main_widget, game_manager, vbox):
+    def __init__(self, hbox, main_widget, game_manager, vbox, vbox2):
         super().__init__()
         self.main_widget = main_widget
         self.timer = QTimer()
@@ -14,6 +14,7 @@ class frontUtils(QObject):
         self.game_manager = game_manager
         self.vbox = vbox
         self.timer.timeout.connect(self.game_manager.printMouse)
+        self.vbox2 = vbox2
     
     def testButton(self):
         button = QPushButton("Test menu", self.main_widget)
@@ -21,7 +22,8 @@ class frontUtils(QObject):
                              "font-family: Times New Roman;" 
                              "font-weight: bold;"
                              "color: white")
-        self.vbox.addWidget(button)
+        button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.vbox2.addWidget(button)
         button.clicked.connect(self.game_manager.buttonFunc)
 
     def mouseButton(self):
@@ -34,7 +36,8 @@ class frontUtils(QObject):
                              "font-family: Times New Roman;" 
                              "font-weight: bold;"
                              "color: white")
-        self.vbox.addWidget(button)
+        button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.vbox2.addWidget(button)
         button.toggled.connect(self.mouseLoc)
             
     def mouseLoc(self, state):
