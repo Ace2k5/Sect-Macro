@@ -10,7 +10,7 @@ TITLE = "Sect v0.0.1"
     Initializes and sets Qtapplication as the parent application where Roblox is the child and is attached to the Qtapplication 
 '''
 class RobloxWindow(QMainWindow):
-    def __init__(self, game_config: dict, mode: str, log_window: object):
+    def __init__(self, game_config: dict, mode: str, log_window: object, unit_window: object):
         super().__init__()
         # IMPORTANT #
         self.game_config = game_config
@@ -21,17 +21,22 @@ class RobloxWindow(QMainWindow):
         self.logger = log_window
         #
 
+        # UNIT WINDOW #
+        self.unit_window = unit_window
+        #
+
         # Qt 
         self.setupQt()
         self.setupMainWindow()
-        qt_window_handle = self.winId()
+        self.qt_window_handle = self.winId()
         #
 
         # SETUP
         self.logger_button = self.setupToggleLogger()
+        self.unit_button = self.setupUnitWindowButton()
         self.manager = game_manager.GameManager(self.hbox, self.roblox_container, self.container,
-                                                qt_window_handle, self.layout, self.game_config, self.mode,
-                                                self.logger_button, self.logger)
+                                                self.qt_window_handle, self.layout, self.game_config, self.mode,
+                                                self.logger_button, self.logger, self.unit_window, self.unit_button)
         self.game_res = self.manager.game_res
         self.hwnd = self.manager.hwnd
         self.setupRobloxWindow()
@@ -75,10 +80,25 @@ class RobloxWindow(QMainWindow):
         button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.vbox2.addWidget(button)
         return button
+    
+    def setupUnitWindowButton(self):
+        '''
+        Button to showcase the unit window
+        '''
+        button = QPushButton("Unit Placement")
+        button.setStyleSheet("font-size: 30px;" \
+                            "font-family: Times New Roman;" 
+                            "font-weight: bold;"
+                            "color: white;"
+                            )
+        button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.vbox2.addWidget(button)
+        return button
+        
 
     def setupModeButtons(self):
         '''
-        Button for current available mode
+        Button for current available mode, originated from mainwindow
         '''
 
         game_modes = self.game_config.get("gamemode")
@@ -110,6 +130,28 @@ class RobloxWindow(QMainWindow):
     
     def deattachWindow(self):
         windows_util.removeParent(self.hwnd, self.game_res[0], self.game_res[1])
+
+    def removeUnitWindowBorders(self):
+        '''
+        Remove title bar and borders from unit window
+        '''
+
+        if hasattr(self.unit_window, 'winId'):
+            unit_window_hwnd = self.unit_window.winId()
+            if unit_window_hwnd:
+                import win32gui
+                import win32con
+                
+                current_style = win32gui.GetWindowLong(unit_window_hwnd, win32con.GWL_STYLE)
+                new_style = current_style & ~(
+                    win32con.WS_MINIMIZEBOX | 
+                    win32con.WS_MAXIMIZEBOX |
+                    win32con.WS_SYSMENU
+                )
+                win32gui.SetWindowLong(unit_window_hwnd, win32con.GWL_STYLE, new_style)
+                win32gui.SetWindowPos(unit_window_hwnd, None, 0, 0, 0, 0,
+                                    win32con.SWP_NOMOVE | win32con.SWP_NOSIZE | 
+                                    win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED)
 
     def remove_logger_borders(self):
         """
@@ -147,7 +189,9 @@ class RobloxWindow(QMainWindow):
         '''
         for debugging window, checking template_matching and all other stuff.
         '''
-        self.debug = debug_utils.frontUtils(self.hbox, self.main_widget, self.manager, self.layout, self.vbox2)
+        self.debug = debug_utils.frontUtils(self.hbox, self.main_widget, self.manager, self.layout,
+                                            self.vbox2, self.qt_window_handle, self.hwnd, self.manager.template_match,
+                                            self.qt_window_handle)
         self.debug.testButton()
         self.debug.mouseButton()
         

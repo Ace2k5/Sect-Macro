@@ -10,7 +10,8 @@ TITLE = "Sect v0.0.1"
 class GameManager(QObject):
     def __init__(self, hbox: QHBoxLayout, roblox_container: tuple[int, int],
                  container: QObject, qt_window_handle: int, layout: QVBoxLayout,
-                 game_config: dict, mode: str, logger_button: object, logger_instance: object):
+                 game_config: dict, mode: str, logger_button: QPushButton, logger_instance: object,
+                 unit_window: object, unit_button: QPushButton):
         super().__init__()
         # Qt
         self.hbox = hbox
@@ -40,7 +41,10 @@ class GameManager(QObject):
         self.state_manager = self.gameInstance()
         self.logger_instance = logger_instance
         self.logger_button = logger_button
+        self.unit_window_instance = unit_window
+        self.unit_button = unit_button
         self.logger_button.clicked.connect(self.loggerShow)
+        self.unit_button.clicked.connect(self.unitWindowShow)
         self.final_container = windows_util.setupattachWindow(self.hwnd, self.container, self.game_res[0], self.game_res[1])
         #
         
@@ -108,24 +112,21 @@ class GameManager(QObject):
 
         uses parallelism for template-matching so the gui doesn't freeze
         '''
-        if self.template_thread and self.template_thread.isRunning():
-            return
-        else:
-            self.template_thread = QThread()
-            self.template_worker = threading.Worker()
+        self.template_thread = QThread()
+        self.template_worker = threading.Worker()
 
-            # args for this are prefilled using a lambda function
-            self.template_worker.setup(template_match, template_filename, rect)
-            self.template_worker.moveToThread(self.template_thread)
-            
-            self.template_worker.location_found.connect(self.handle_location_found)
-            
-            self.template_worker.finished.connect(self.template_thread.quit)
-            self.template_worker.finished.connect(self.template_worker.deleteLater)
-            self.template_thread.finished.connect(self.template_thread.deleteLater)
-            
-            self.template_thread.started.connect(self.template_worker.run)
-            self.template_thread.start()
+        # args for this are prefilled using a lambda function
+        self.template_worker.setup(template_match, template_filename, rect)
+        self.template_worker.moveToThread(self.template_thread)
+        
+        self.template_worker.location_found.connect(self.handle_location_found)
+        
+        self.template_worker.finished.connect(self.template_thread.quit)
+        self.template_worker.finished.connect(self.template_worker.deleteLater)
+        self.template_thread.finished.connect(self.template_thread.deleteLater)
+        
+        self.template_thread.started.connect(self.template_worker.run)
+        self.template_thread.start()
         
     def cleanupWorker(self):
         if self.template_thread and self.template_thread.isRunning():
@@ -144,6 +145,14 @@ class GameManager(QObject):
             self.logger_instance.show()
             self.logger_button.setText("Hide Logger")
 
+    def unitWindowShow(self):
+        if self.unit_window_instance.isVisible():
+            self.unit_window_instance.hide()
+            self.unit_button.setText("Unit Placement")
+        else:
+            self.unit_window_instance.show()
+            self.unit_button.setText("Hide Unit Placement")
+
     # --------------------- DEBUG TOOLS --------------------- #
     def _debugWindowInfo(self) -> None:
         ### --- DEBUG INFO --- ###
@@ -158,38 +167,3 @@ class GameManager(QObject):
         print("window rect:", rect, "=> w,h =", rect[2]-rect[0], "x", rect[3]-rect[1])
         print("client rect:", client, "=> w,h =", client[2]-client[0], "x", client[3]-client[1])
         ### --- DEBUG INFO END --- ###
-        
-        
-    def printMouse(self) -> None:
-        '''
-        this function gets the relative positioning of the roblox application. By subtracting the position of the cursor and the x and y of the application
-        we are able to find where the roblox window is and check if it is outside the boundary
-        steps:
-        1. get cursor x and y via getcursorpos()
-        2. find top and left from getwindowrect(self.hwnd)
-        3. subtract x - top, y - left to get relative x and y to the screen of the Roblox window
-        4. left, top, right, bottom to detect the relative position of roblox window
-        5. check if qt application is minimized first to stop unnecessary logs when qt is minimized
-        6. if x is greater than left and less than right, then it is inside the boundary, same goes for y but top and bottom otherwise it is outside
-        '''
-        x, y = win32api.GetCursorPos()
-        rect = win32gui.GetWindowRect(self.hwnd)
-        relative_x, relative_y = (x - rect[0]), (y - rect[1])
-        left, top, right, bottom = win32gui.GetWindowRect(self.hwnd)
-        
-        minimized = self.qt_hwnd
-        if win32gui.IsIconic(minimized):
-            print("Window is minimized.")
-        else:
-            if left <= x <= right and top <= y <= bottom:
-                relative_x, relative_y = x - left, y - top
-                print((relative_x, relative_y))
-            else:
-                print("Mouse is outside boundary.")
-    
-    def buttonFunc(self):
-        '''
-        testing connectivity between backend and frontend
-        '''
-        current_roblox_rect = win32gui.GetWindowRect(self.hwnd)
-        self.start_worker(self.template_match, "sjw.png", current_roblox_rect)

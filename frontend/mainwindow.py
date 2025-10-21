@@ -2,7 +2,7 @@ from PyQt5.QtCore import (Qt, QTimer)
 from PyQt5.QtWidgets import (QMainWindow, QLabel, QWidget, QVBoxLayout,
                              QPushButton, QSpacerItem, QSizePolicy)
 from backend import initializers, windows_util
-from . import RobloxWindow, logging
+from . import RobloxWindow, logging, unit_window
 from functools import partial
 '''
     The initial application window where user can select a multitude of games(?)
@@ -50,18 +50,28 @@ class MainWindow(QMainWindow):
                                 "font-weight: bold;"
                                 "color: white;"
                                 )
-            button.clicked.connect(partial(self.chooseMode, game_config, button)) # partial prefills some of the args, each individual loop has their own values passed unto RobloxWindow class
+            button.clicked.connect(partial(self.chooseMode, game_config)) # partial prefills some of the args, each individual loop has their own values passed unto RobloxWindow class
                                                                           # root of all game_configs
             self.layout.addWidget(button, alignment=Qt.AlignTop)
         spacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.layout.addItem(spacer)
 
 
-    def chooseMode(self, game_config: dict, original_button):
+    def chooseMode(self, game_config: dict):
         for i in reversed(range(self.layout.count())):
-            widget = self.layout.itemAt(i).widget()
-            if widget and widget != original_button:
-                widget.setParent(None)
+            item = self.layout.itemAt(i)
+            if item.widget():
+                item.widget().deleteLater()
+            elif item.spacerItem():
+                self.layout.removeItem(item)
+
+        label = QLabel(game_config.get("display_name"))
+        label.setStyleSheet("font-size: 50px;" \
+                            "font-family: Times New Roman;"
+                            "font-weight: bold;"
+                            "color: white;"
+                            )
+        self.layout.addWidget(label, alignment=Qt.AlignTop | Qt.AlignHCenter)
         
         gamemode_configs = game_config.get('gamemode', {})
         
@@ -84,10 +94,9 @@ class MainWindow(QMainWindow):
             try:
                 QTimer.singleShot(100, lambda: clicked_button.setText("Loading..."))
                 self.new_log_window = logging.LoggerWindow()
-                self.new_window = RobloxWindow.RobloxWindow(game_config, mode, self.new_log_window)
+                self.new_unit_window = unit_window.UnitWindow()
+                self.new_window = RobloxWindow.RobloxWindow(game_config, mode, self.new_log_window, self.new_unit_window)
                 self.new_window.show()
-                self.new_log_window.show()
-                self.new_log_window.hide()
                 self.close()
             except RuntimeError:
                 QTimer.singleShot(100, lambda: clicked_button.setText("Roblox is not open, please open Roblox..."))

@@ -39,5 +39,8 @@ qt = {
         "logging_res": (400, 600),
         "debug_box": (200, 300),
         "logging_box": (200, 300)
+    },
+    "unit_window":{
+        "unit_window_res": (1150, 400)
     }
 }
