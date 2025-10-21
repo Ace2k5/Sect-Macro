@@ -43,11 +43,12 @@ class RobloxWindow(QMainWindow):
         self.hwnd = self.manager.hwnd
         self.setupRobloxWindow()
         self.setupModeButtons()
+        self.removeUnitWindowBorders()
         #
 
         # DEV TOOLS
         self.setupDebugControls()
-        self.remove_logger_borders()
+        self.removeLoggerBorders()
         #
         
     def setupQt(self):
@@ -155,7 +156,7 @@ class RobloxWindow(QMainWindow):
                                     win32con.SWP_NOMOVE | win32con.SWP_NOSIZE | 
                                     win32con.SWP_NOZORDER | win32con.SWP_FRAMECHANGED)
 
-    def remove_logger_borders(self):
+    def removeLoggerBorders(self):
         """
         Remove title bar and borders from logger window
         """

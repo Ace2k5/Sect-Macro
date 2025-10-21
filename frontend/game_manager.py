@@ -153,7 +153,7 @@ class GameManager(QObject):
             self.unit_button.setText("Unit Placement")
         else:
             self.unit_window_instance.show()
-            self.unit_button.setText("Hide Unit Placement")
+            self.unit_button.setText("Hide Unit\nPlacement")
 
     # --------------------- DEBUG TOOLS --------------------- #
     def _debugWindowInfo(self) -> None:

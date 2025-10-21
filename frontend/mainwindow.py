@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
         
         for mode in gamemode_configs:
             mode_button = QPushButton(f"{mode.title()} Mode", self)
-            mode_button.setStyleSheet("font-size: 25px;" \
+            mode_button.setStyleSheet("font-size: 30px;" \
                                  "font-family: Times New Roman;" 
                                  "font-weight: bold;"
                                  "color: white;")
