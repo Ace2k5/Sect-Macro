@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal, QDateTime, Qt
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QPushButton, QTextEdit, QComboBox, 
                              QCheckBox, QLabel)
@@ -29,8 +29,16 @@ class LoggerWindow(QMainWindow):
         logs_label = QLabel("Logs")
         self.logs_text = QTextEdit()
         self.logs_text.setReadOnly(True)
+        button = QPushButton("Clear Debug", logs_panel)
+        button.setStyleSheet("color: white;"
+                            "font-family: Times New Roman;"
+                            "font-size: 10px")
+        self.logs_text.setStyleSheet("color: white;"
+                                     "font-family: Times New Roman")
 
-        layout_v.addWidget(logs_label)
+
+        layout_v.addWidget(logs_label, alignment=Qt.AlignHCenter)
+        layout_v.addWidget(button, alignment=Qt.AlignHCenter)
         layout_v.addWidget(self.logs_text)
 
         logs_label.setStyleSheet("font-size: 25px;" \
@@ -42,6 +50,7 @@ class LoggerWindow(QMainWindow):
         logs_panel.setStyleSheet("background-color: #3c3c42;"
                                  "border: none")
 
+        button.clicked.connect(self.clear_logs)
         self.main_layout.addWidget(logs_panel)
 
     def setupDebugPanel(self):
@@ -51,8 +60,16 @@ class LoggerWindow(QMainWindow):
         debug_label = QLabel("Debug")
         self.debug_text = QTextEdit()
         self.debug_text.setReadOnly(True)
+        button = QPushButton("Clear Debug", debug_panel)
+        button.setStyleSheet("color: white;"
+                            "font-family: Times New Roman;"
+                            "font-size: 10px")
 
-        layout_v.addWidget(debug_label)
+        self.debug_text.setStyleSheet("color: white;"
+                                    "font-family: Times New Roman;")
+
+        layout_v.addWidget(debug_label, alignment=Qt.AlignHCenter)
+        layout_v.addWidget(button, alignment=Qt.AlignHCenter)
         layout_v.addWidget(self.debug_text)
 
         debug_panel.setStyleSheet("background-color: #3c3c42;"
@@ -62,11 +79,37 @@ class LoggerWindow(QMainWindow):
                             "font-weight: bold;"
                             "color: white;"
                             )
+        button.clicked.connect(self.clear_debug)
 
 
         self.main_layout.addWidget(debug_panel)
 
-
+    def log_message(self, message: str, level: str = "INFO"):
+        """Add a message to the logs panel"""
+        timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
+        formatted_message = f"[{timestamp}] [{level}] {message}"
+        self.logs_text.append(formatted_message)
+        
+        cursor = self.logs_text.textCursor()
+        cursor.movePosition(cursor.End)
+        self.logs_text.setTextCursor(cursor)
+        self.logs_text.ensureCursorVisible()
+    
+    def debug_message(self, message: str):
+        """Add a message to the debug panel"""
+        timestamp = QDateTime.currentDateTime().toString("hh:mm:ss")
+        formatted_message = f"[{timestamp}] {message}"
+        self.debug_text.append(formatted_message)
+        
+        cursor = self.debug_text.textCursor()
+        cursor.movePosition(cursor.End)
+        self.debug_text.setTextCursor(cursor)
+        self.debug_text.ensureCursorVisible()
+    
+    def clear_logs(self):
+        self.logs_text.clear()
+    def clear_debug(self):
+        self.debug_text.clear()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

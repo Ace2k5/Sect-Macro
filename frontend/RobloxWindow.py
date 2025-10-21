@@ -19,6 +19,8 @@ class RobloxWindow(QMainWindow):
 
         # LOGGER #
         self.logger = log_window
+        self.log = self.logger.log_message
+        self.debug = self.logger.debug_message
         #
 
         # UNIT WINDOW #
@@ -191,7 +193,7 @@ class RobloxWindow(QMainWindow):
         '''
         self.debug = debug_utils.frontUtils(self.hbox, self.main_widget, self.manager, self.layout,
                                             self.vbox2, self.qt_window_handle, self.hwnd, self.manager.template_match,
-                                            self.qt_window_handle)
+                                            self.qt_window_handle, self.logger)
         self.debug.testButton()
         self.debug.mouseButton()
         

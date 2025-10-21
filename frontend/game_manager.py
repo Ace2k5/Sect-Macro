@@ -41,6 +41,8 @@ class GameManager(QObject):
         self.state_manager = self.gameInstance()
         self.logger_instance = logger_instance
         self.logger_button = logger_button
+        self.log = self.logger_instance.log_message
+        self.debug = self.logger_instance.debug_message
         self.unit_window_instance = unit_window
         self.unit_button = unit_button
         self.logger_button.clicked.connect(self.loggerShow)
@@ -100,7 +102,7 @@ class GameManager(QObject):
         this code handles the location emitted and referenced by the thread worker
         '''
         if location:
-            print(f"Found location in: {location}")
+            self.log(f"Found location in: {location}")
             # log shit
         
     def start_worker(self, template_match: template_matching.ImageProcessor, template_filename: str, rect: tuple):
@@ -132,7 +134,7 @@ class GameManager(QObject):
         if self.template_thread and self.template_thread.isRunning():
             self.template_thread.quit()
             self.template_thread.wait()
-        print("Worker cleaned up.")
+        self.debug("Worker cleaned up.")
 # ------------------------- THREAD ------------------------------- #
 
 # ----------------------- CALLABLES ----------------------- #
@@ -156,14 +158,14 @@ class GameManager(QObject):
     # --------------------- DEBUG TOOLS --------------------- #
     def _debugWindowInfo(self) -> None:
         ### --- DEBUG INFO --- ###
-        print("=== Qt container ===")
-        print("size:", self.final_container.size().width(), "x", self.final_container.size().height())
-        print("geometry:", self.final_container.geometry())         # QRect: x,y,w,h
-        print("contentsRect:", self.final_container.contentsRect()) # excludes margins
+        self.debug("=== Qt container ===")
+        self.debug(["size:", self.final_container.size().width(), "x", self.final_container.size().height()])
+        self.debug(["geometry:", self.final_container.geometry()])         # QRect: x,y,w,h
+        self.debug(["contentsRect:", self.final_container.contentsRect()]) # excludes margins
 
         rect = win32gui.GetWindowRect(self.hwnd)   # (left, top, right, bottom)
         client = win32gui.GetClientRect(self.hwnd) # (0,0,width,height) relative
-        print("=== Roblox HWND ===")
-        print("window rect:", rect, "=> w,h =", rect[2]-rect[0], "x", rect[3]-rect[1])
-        print("client rect:", client, "=> w,h =", client[2]-client[0], "x", client[3]-client[1])
+        self.debug(["=== Roblox HWND ==="])
+        self.debug(["window rect:", rect, "=> w,h =", rect[2]-rect[0], "x", rect[3]-rect[1]])
+        self.debug(["client rect:", client, "=> w,h =", client[2]-client[0], "x", client[3]-client[1]])
         ### --- DEBUG INFO END --- ###

@@ -8,7 +8,7 @@ import win32api
 class frontUtils(QObject):
     def __init__(self, hbox: QHBoxLayout, main_widget: QWidget, game_manager: object,
                 vbox: QVBoxLayout, vbox2: QVBoxLayout, qt_window: tuple[int, int], hwnd: int,
-                template_match: object, qt_hwnd: int):
+                template_match: object, qt_hwnd: int, logger: object):
         super().__init__()
         # Qt
         self.main_widget = main_widget
@@ -22,6 +22,10 @@ class frontUtils(QObject):
         self.qt_hwnd = qt_hwnd
         #
 
+        # logs
+        self.logger = logger
+        self.log = self.logger.log_message
+        self.debug = self.logger.debug_message
         # Game Manager
         self.hwnd = hwnd
         self.template_match = template_match
@@ -79,13 +83,13 @@ class frontUtils(QObject):
         
         minimized = self.qt_hwnd
         if win32gui.IsIconic(minimized):
-            print("Window is minimized.")
+            self.debug("Window is minimized.")
         else:
             if left <= x <= right and top <= y <= bottom:
                 relative_x, relative_y = x - left, y - top
-                print((relative_x, relative_y))
+                self.log((relative_x, relative_y))
             else:
-                print("Mouse is outside boundary.")
+                self.debug("Mouse is outside boundary.")
 
         
             
