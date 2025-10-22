@@ -37,12 +37,12 @@ class GameManager(QObject):
         self.mode = mode
         self.hwnd = self.setupHWND()
         self.game_res = self.setupRobloxIntegration()
-        self.setupTemplateMatching()
-        self.state_manager = self.gameInstance()
         self.logger_instance = logger_instance
         self.logger_button = logger_button
         self.log = self.logger_instance.log_message
         self.debug = self.logger_instance.debug_message
+        self.setupTemplateMatching()
+        self.state_manager = self.gameInstance()
         self.unit_window_instance = unit_window
         self.unit_button = unit_button
         self.logger_button.clicked.connect(self.loggerShow)
@@ -77,7 +77,7 @@ class GameManager(QObject):
         self.game_images = self.game_config.get('game_images')
         if self.game_images is None:
             raise KeyError(f"The key type of game_config[{self.game_images}] does not exist.")
-        self.template_match = template_matching.ImageProcessor(self.game_images)
+        self.template_match = template_matching.ImageProcessor(self.game_images, self.logger_instance, self.mode)
         
     def setupRobloxIntegration(self):
         '''

@@ -12,10 +12,13 @@ class ImageProcessor():
     is strict, game_images comes from the partial set in mainwindow.py where each game should be linking towards a
     different folder in Images. ORB is a fallback image detection system incase original template_matching fails.
     '''
-    def __init__(self, game_images=None, max_thresh = 0.85):
+    def __init__(self, game_images=None, logger_instance=None, mode=None, max_thresh = 0.85):
+        self.logger = logger_instance
+        self.log = self.logger.log_message
+        self.debug = self.logger.debug_message
         self.max_thresh = max_thresh
         self.game_images = game_images
-        self.folder_dir = Path(f"Images/{self.game_images}")
+        self.folder_dir = Path(f"Images/{self.game_images}/{mode}")
         self.center_x = None
         self.center_y = None
         self._init_images()
@@ -32,9 +35,13 @@ class ImageProcessor():
         '''
         self.templates_grey = {}
         print(f"Current working directory: {os.getcwd()}")
+        self.debug(f"Current working directory: {os.getcwd()}")
         print(f"Looking for images in: {self.folder_dir}")
+        self.debug(f"Looking for images in: {self.folder_dir}")
         print(f"Absolute path: {self.folder_dir.absolute()}")
+        self.debug(f"Absolute path: {self.folder_dir.absolute()}")
         print(f"Path exists: {self.folder_dir.exists()}")
+        self.debug(f"Path exists: {self.folder_dir.exists()}")
         stored_images = self.folder_dir.glob('*.png') #reads every single image file saved as .png using .glob
         for image in stored_images: #loops through .png files and cv reads, if not none, store on templates_grey using filename
             filename = image.name
@@ -77,21 +84,27 @@ class ImageProcessor():
                 }
             else:
                 print("Rect is None in 'screenshot' in template_matching.py")
+                self.debug("Rect is None in 'screenshot' in template_matching.py")
         except Exception as e:
             print(f"Error defining screenshot rectangle: {e}, returning None.") # no point in retrying this. GetWindowsRect() should work always.
+            self.debug(f"Error defining screenshot rectangle: {e}, returning None.")
         for i in range(5): # try to capture screenshot up to 5 times
             try:
                 temp_img = mss.grab(final_rect)
                 img_np = np.array(temp_img)
                 if img_np.size == 0:
                     print("Captured image is empty.")
+                    self.debug("Captured image is empty.")
                 print(f"[DEBUG] Screenshot rect: {final_rect}, image shape: {img_np.shape}")
+                self.debug(f"[DEBUG] Screenshot rect: {final_rect}, image shape: {img_np.shape}")
                 return cv.cvtColor(img_np, cv.COLOR_BGRA2GRAY)
             except Exception as e:
                 print(f"Error capturing screenshot (attempt {i+1}/5): {e}")
+                self.debug(f"Error capturing screenshot (attempt {i+1}/5): {e}")
                 time.sleep(0.1)
         print("Failed to capture screenshot after 5 attempts.")
-        
+        self.debug("Failed to capture screenshot after 5 attempts.")
+
     def both_methods(self, template_filename: str, rect, mss): # Uses both methods of template_matching and a fallback of ORB.
         '''
         includes both template matching and ORB

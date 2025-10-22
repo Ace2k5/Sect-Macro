@@ -205,4 +205,6 @@ class RobloxWindow(QMainWindow):
         self.deattachWindow()
         if self.logger:
             self.logger.close()
+        if self.unit_window:
+            self.unit_window.close()
         super().closeEvent(event)

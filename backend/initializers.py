@@ -41,6 +41,6 @@ qt = {
         "logging_box": (200, 300)
     },
     "unit_window":{
-        "unit_window_res": (1150, 400)
+        "unit_window_res": (600, 300)
     }
 }

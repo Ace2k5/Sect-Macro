@@ -101,7 +101,7 @@ class frontUtils(QObject):
         if state:
             self.timer.start(200)
             if sender_button:
-                sender_button.setText("Getting coordinates.")
+                sender_button.setText("Getting\ncoordinates.")
         else:
             self.timer.stop()
             if sender_button:
