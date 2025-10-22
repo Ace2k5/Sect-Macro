@@ -112,7 +112,7 @@ class GameManager(QObject):
         template filname -> str
         rect(window x,y,w,h) -> tuple
 
-        uses parallelism for template-matching so the gui doesn't freeze
+        uses concurrency for template-matching so the gui doesn't freeze
         '''
         self.template_thread = QThread()
         self.template_worker = threading.Worker()
