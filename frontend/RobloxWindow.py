@@ -79,6 +79,9 @@ class RobloxWindow(QMainWindow):
                             "font-family: Times New Roman;" 
                             "font-weight: bold;"
                             "color: white;"
+                            "border-width: 1px;"
+                            "border-color: #555555;"
+                            "border-style: solid;"
                             )
         button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.vbox2.addWidget(button)
@@ -89,11 +92,13 @@ class RobloxWindow(QMainWindow):
         Button to showcase the unit window
         '''
         button = QPushButton("Unit Placement")
-        button.setStyleSheet("font-size: 30px;" \
+        button.setStyleSheet("font-size: 30px;"
                             "font-family: Times New Roman;" 
                             "font-weight: bold;"
                             "color: white;"
-                            )
+                            "border-width: 1px;"
+                            "border-color: #555555;"
+                            "border-style: solid;")
         button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.vbox2.addWidget(button)
         return button
@@ -107,11 +112,13 @@ class RobloxWindow(QMainWindow):
         game_modes = self.game_config.get("gamemode")
         if self.mode in game_modes:
             button = QPushButton(self.mode)
-            button.setStyleSheet("font-size: 30px;" \
+            button.setStyleSheet("font-size: 30px;"
                             "font-family: Times New Roman;" 
                             "font-weight: bold;"
                             "color: white;"
-                            )
+                            "border-width: 1px;"
+                            "border-color: #555555;"
+                            "border-style: solid;")
             button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.vbox2.addWidget(button)
 
@@ -192,11 +199,9 @@ class RobloxWindow(QMainWindow):
         '''
         for debugging window, checking template_matching and all other stuff.
         '''
-        self.debug = debug_utils.frontUtils(self.hbox, self.main_widget, self.manager, self.layout,
+        self.debug = debug_utils.DebugController(self.hbox, self.main_widget, self.manager, self.layout,
                                             self.vbox2, self.qt_window_handle, self.hwnd, self.manager.template_match,
                                             self.qt_window_handle, self.logger)
-        self.debug.testButton()
-        self.debug.mouseButton()
         
     def closeEvent(self, event):
         '''

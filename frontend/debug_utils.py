@@ -1,13 +1,13 @@
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                             QPushButton, QSizePolicy, QTextEdit)
-from PyQt5.QtCore import QTimer, QObject
+                             QPushButton, QSizePolicy, QTextEdit, QLabel)
+from PyQt5.QtCore import QTimer, QObject, Qt
 from . import threading
 import win32gui
 from pathlib import Path
 import win32api
-class frontUtils(QObject):
+class DebugController(QObject):
     def __init__(self, hbox: QHBoxLayout, main_widget: QWidget, game_manager: object,
-                vbox: QVBoxLayout, vbox2: QVBoxLayout, qt_window: tuple[int, int], hwnd: int,
+                layout: QVBoxLayout, vbox2: QVBoxLayout, qt_window: tuple[int, int], hwnd: int,
                 template_match: object, qt_hwnd: int, logger: object):
         super().__init__()
         # Qt
@@ -15,7 +15,7 @@ class frontUtils(QObject):
         self.timer = QTimer()
         self.hbox = hbox
         self.game_manager = game_manager
-        self.vbox = vbox
+        self.layout = layout
         self.timer.timeout.connect(self.printMouse)
         self.vbox2 = vbox2
         self.qt_window = qt_window
@@ -31,18 +31,45 @@ class frontUtils(QObject):
         self.template_match = template_match
         self.start_worker = self.game_manager.start_worker
         #
+        
+        self.devTools()
+    
+    
+    def devTools(self):
+        local_container = QWidget()
+        local_container.setStyleSheet("border-color: #555555;"
+                                      "border-width: 1px;"
+                                      "border-style: solid;")
+        local_vbox = QVBoxLayout(local_container)
+        test = self.testButton()
+        coords = self.mouseButton()
+        label = QLabel("Dev Tools")
+        label.setStyleSheet("font-size: 10px;"
+                            "font-family: Times New Roman;"
+                            "font-weight: bold;"
+                            "color: white;"
+                            "border: none;"
+                            )
+        label.setFixedHeight(20)
+        label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        local_vbox.addWidget(label, alignment=Qt.AlignHCenter)
+        local_vbox.addWidget(test)
+        local_vbox.addWidget(coords)
+        self.vbox2.addWidget(local_container)
+        
     
     def testButton(self):
         button = QPushButton("Test menu", self.main_widget)
-        button.setStyleSheet("font-size: 30px;" \
+        button.setStyleSheet("font-size: 30px;"
                              "font-family: Times New Roman;" 
                              "font-weight: bold;"
-                             "color: white")
+                             "color: white;")
         button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         self.vbox2.addWidget(button)
-        button.clicked.connect(self.buttonFunc)
+        button.clicked.connect(self.templateTest)
+        return button
 
-    def buttonFunc(self):
+    def templateTest(self):
         '''
         testing connectivity between backend and frontend
         '''
@@ -55,13 +82,13 @@ class frontUtils(QObject):
         '''
         button = QPushButton("Mouse Debug", self.main_widget)
         button.setCheckable(True)
-        button.setStyleSheet("font-size: 30px;" \
+        button.setStyleSheet("font-size: 30px;"
                              "font-family: Times New Roman;" 
                              "font-weight: bold;"
-                             "color: white")
+                             "color: white;")
         button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        self.vbox2.addWidget(button)
         button.toggled.connect(self.mouseLoc)
+        return button
 
 
     def printMouse(self) -> None:

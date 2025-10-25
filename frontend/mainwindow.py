@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (QMainWindow, QLabel, QWidget, QVBoxLayout,
 from backend import initializers, windows_util
 from . import RobloxWindow, logging, unit_window
 from functools import partial
+import time
 '''
     The initial application window where user can select a multitude of games(?)
 '''
@@ -44,7 +45,7 @@ class MainWindow(QMainWindow):
         
     def initButtons(self):
         for game_config in initializers.game_configs.values():
-            button = QPushButton(game_config.get("display_name"), self)
+            button = QPushButton(game_config["display_name"])
             button.setStyleSheet("font-size: 30px;" \
                                 "font-family: Times New Roman;" 
                                 "font-weight: bold;"
@@ -65,7 +66,7 @@ class MainWindow(QMainWindow):
             elif item.spacerItem():
                 self.layout.removeItem(item)
 
-        label = QLabel(game_config.get("display_name"))
+        label = QLabel(game_config["display_name"])
         label.setStyleSheet("font-size: 50px;" \
                             "font-family: Times New Roman;"
                             "font-weight: bold;"
@@ -73,7 +74,7 @@ class MainWindow(QMainWindow):
                             )
         self.layout.addWidget(label, alignment=Qt.AlignTop | Qt.AlignHCenter)
         
-        gamemode_configs = game_config.get('gamemode', {})
+        gamemode_configs = game_config['gamemode']
         
         for mode in gamemode_configs:
             mode_button = QPushButton(f"{mode.title()} Mode", self)
@@ -88,7 +89,8 @@ class MainWindow(QMainWindow):
 
     def newWindow(self, game_config: dict, mode: str):
         print(f"Loading game: {game_config}")
-        original_message = game_config.get("display_name")
+        time.sleep(0.5)
+        original_message = game_config["display_name"]
         clicked_button = self.sender()
         if clicked_button:
             try:

@@ -123,7 +123,7 @@ class ImageProcessor():
         if current_gray is None:
             print("Screenshot has failed. Please fix.")
             return
-        template_img = self.templates_grey.get(template_filename) #uses the templates_grey dictionary to find
+        template_img = self.templates_grey[template_filename] #uses the templates_grey dictionary to find
                                                                     #specific filename
         if template_img is not None:
             result = cv.matchTemplate(current_gray, template_img, cv.TM_CCOEFF_NORMED)

@@ -19,7 +19,7 @@ class GameManager(QObject):
         self.roblox_container = roblox_container
         self.container = container
         self.qt_hwnd = qt_window_handle
-        self.vbox = layout
+        self.layout = layout
         #
 
         # Thread worker
@@ -37,10 +37,14 @@ class GameManager(QObject):
         self.mode = mode
         self.hwnd = self.setupHWND()
         self.game_res = self.setupRobloxIntegration()
+        # logger
         self.logger_instance = logger_instance
         self.logger_button = logger_button
+        # / logger functions
         self.log = self.logger_instance.log_message
         self.debug = self.logger_instance.debug_message
+        
+        # template matching
         self.setupTemplateMatching()
         self.state_manager = self.gameInstance()
         self.unit_window_instance = unit_window

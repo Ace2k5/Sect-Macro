@@ -49,13 +49,12 @@ class UnitWindow(QMainWindow):
                             )
             label.setAlignment(Qt.AlignCenter)
             unit_vbox.addWidget(label, alignment=Qt.AlignHCenter)
-            unit_label = QLabel()
+            unit_label = QLabel("Unit slot")
             unit_label.setStyleSheet("font-size: 10px;" \
                             "font-family: Times New Roman;"
                             "font-weight: bold;"
                             "color: white;"
                             )
-            unit_label.setText("Unit slot")
             text_input = QLineEdit()
             text_input.setStyleSheet("font-size: 10px;" \
                             "font-family: Times New Roman;"
@@ -63,14 +62,12 @@ class UnitWindow(QMainWindow):
                             "color: white;"
                             )
             text_input.setPlaceholderText(f"Slot for Unit {i + 1}")
-
-            coordinates_label = QLabel()
+            coordinates_label = QLabel("Unit Coordinates:")
             coordinates_label.setStyleSheet("font-size: 10px;" \
                             "font-family: Times New Roman;"
                             "font-weight: bold;"
                             "color: white;"
                             )
-            coordinates_label.setText("Unit Coordinates:")
             coordinates_input_x = QLineEdit()
             coordinates_input_x.setStyleSheet("font-size: 10px;" \
                             "font-family: Times New Roman;"
@@ -120,8 +117,7 @@ class UnitWindow(QMainWindow):
                     padding: 2px;
                 """)
 
-            label = QLabel()
-            label.setText(f"Unit {i + 3}")
+            label = QLabel(f"Unit {i + 3}")
             label.setStyleSheet("font-size: 10px;" \
                             "font-family: Times New Roman;"
                             "font-weight: bold;"
@@ -130,28 +126,26 @@ class UnitWindow(QMainWindow):
                             )
             label.setAlignment(Qt.AlignCenter)
             unit_vbox.addWidget(label, alignment=Qt.AlignHCenter)
-            unit_label = QLabel()
+            unit_label = QLabel("Unit slot")
             unit_label.setStyleSheet("font-size: 10px;" \
                             "font-family: Times New Roman;"
                             "font-weight: bold;"
                             "color: white;"
                             )
-            unit_label.setText("Unit slot")
             text_input = QLineEdit()
             text_input.setStyleSheet("font-size: 10px;" \
                             "font-family: Times New Roman;"
                             "font-weight: bold;"
                             "color: white;"
                             )
-            text_input.setPlaceholderText(f"Slot for Unit {i + 3}")
+            text_input.setPlaceholderText(f"Slot for Unit {i + 1}")
 
-            coordinates_label = QLabel()
+            coordinates_label = QLabel("Unit Coordinates:")
             coordinates_label.setStyleSheet("font-size: 10px;" \
                             "font-family: Times New Roman;"
                             "font-weight: bold;"
                             "color: white;"
                             )
-            coordinates_label.setText("Unit Coordinates:")
             coordinates_input_x = QLineEdit()
             coordinates_input_x.setStyleSheet("font-size: 10px;" \
                             "font-family: Times New Roman;"
