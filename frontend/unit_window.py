@@ -18,6 +18,9 @@ class UnitWindow(QMainWindow):
         self.setupWindow()
     
 
+    def returnUnitButtons(self):
+        return self.unit_buttons
+    
     def setupWindow(self):
         self.setWindowTitle("Unit Window")
         self.widget = QWidget()

@@ -9,7 +9,7 @@ class FindCoordinate():
         self.game_name = game_config["game_images"]
         self.mode = mode
         self.logging = logging
-        self.unit_window = unit_window
+        self.unit_window = unit_window.returnUnitButtons()
         self.coordinates = None
         self.folder_dir = Path(f"Images/{self.game_name}/{self.mode}/{self.mode}.png")
         if self.folder_dir.absolute():
@@ -20,6 +20,10 @@ class FindCoordinate():
             self.logging.debug_message(f"Folder: {self.mode} could not be found.")
         print(f"The path exists: {self.folder_dir.exists()}")
         self.logging.debug_message(f"The path exists: {self.folder_dir.exists()}")
+        for index, unit in enumerate(self.unit_window):
+            button = unit["button"]
+            button.clicked.connect(lambda _, i=index: self.saveCoordinate(i))
+        
 
     def getCoordinate(self):
         picture = self.folder_dir
@@ -33,7 +37,15 @@ class FindCoordinate():
             if win32api.GetKeyState(0x01) < 0: 
                 break
         cv2.destroyAllWindows()
-        print(self.coordinates)
+        
+        
+    def saveCoordinate(self, index):
+        self.getCoordinate()
+        if self.coordinates:
+            x, y = self.coordinates
+            self.unit_window[index]["x"].setText(str(x))
+            self.unit_window[index]["y"].setText(str(y))
+            print(f"Saved ({x}, {y}) to Unit {index + 1}")
         
         
 
