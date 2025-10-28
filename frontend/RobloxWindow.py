@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import ( QVBoxLayout, QHBoxLayout,
                             QPushButton, QSizePolicy, QWidget, QMainWindow)
-from backend import windows_util, initializers
+from backend import windows_util, initializers, coordinate_picker
 from . import threading, debug_utils, game_manager
 
 #temporary consts
@@ -45,6 +45,9 @@ class RobloxWindow(QMainWindow):
         self.setupModeButtons()
         self.removeUnitWindowBorders()
         #
+        
+        #Coordinates
+        self.coordinate_pick = coordinate_picker.FindCoordinate(self.mode, self.game_config, self.logger, self.unit_window)
 
         # DEV TOOLS
         self.setupDebugControls()

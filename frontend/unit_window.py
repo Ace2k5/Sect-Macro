@@ -14,6 +14,7 @@ class UnitWindow(QMainWindow):
         except KeyError as e:
             raise KeyError(f"Returned {e} when trying to get both unit window and unit window resolution.")
         self.center = windows_util.resolutionMid(self.unit_window_res[0], self.unit_window_res[1])
+        self.unit_buttons = []
         self.setupWindow()
     
 
@@ -90,6 +91,12 @@ class UnitWindow(QMainWindow):
 
             unit_hbox.setSpacing(2)
             unit_hbox.setContentsMargins(0, 0, 0, 0)
+            
+            self.unit_buttons.append({
+                "button": coordinates_place,
+                "x": coordinates_input_x,
+                "y": coordinates_input_y
+            })
 
             grab_slot = text_input.text()
             unit_hbox.addWidget(unit_label, alignment=Qt.AlignHCenter)
@@ -167,6 +174,12 @@ class UnitWindow(QMainWindow):
 
             unit_hbox.setSpacing(2)
             unit_hbox.setContentsMargins(0, 0, 0, 0)
+            
+            self.unit_buttons.append({
+                "button": coordinates_place,
+                "x": coordinates_input_x,
+                "y": coordinates_input_y
+            })
 
             grab_slot = text_input.text()
             unit_hbox.addWidget(unit_label, alignment=Qt.AlignHCenter)
