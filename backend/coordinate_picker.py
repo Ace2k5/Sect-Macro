@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 from pathlib import Path
+import win32api
+import autoit
 
 class FindCoordinate():
     def __init__(self, mode: str, game_config: dict, logging: object):
@@ -13,13 +15,14 @@ class FindCoordinate():
         #picture = self.folder_dir / {self.mode}
         picture = Path(f"Images/guardians/summer/summer_event.png")
         picture_np = cv2.imread(str(picture))
+        appended = False
         if picture_np is None:
             print("NONE")
         cv2.imshow("Select Coordinate", picture_np)
         cv2.setMouseCallback("Select Coordinate", self.mouseCallback)
         while True:
-            key = cv2.waitKey(1) & 0xFF
-            if key != 255:
+            cv2.waitKey(1) & 0xFF
+            if win32api.GetKeyState(0x01) < 0: 
                 break
         cv2.destroyAllWindows()
         
