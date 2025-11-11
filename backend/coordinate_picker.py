@@ -38,7 +38,17 @@ class FindCoordinate():
                 break
         cv2.destroyAllWindows()
         
-        
+    def loadExistingCoordinates(self):
+        data = coordinates_json.loadFromJson()
+        if data and len(data) > 0 and "Unit" in data[0]:
+            units = data[0]["Unit"]
+            for index, unit_data in enumerate(self.unit_window):
+                key = str(index + 1)
+                if key in units:
+                    x, y = units[key]
+                    unit_data["x"].setText(str(x))
+                    unit_data["y"].setText(str(y))
+    
     def saveCoordinate(self, index):
         self.getCoordinate()
         if self.coordinates:
