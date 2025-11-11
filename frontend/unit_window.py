@@ -127,7 +127,7 @@ class UnitWindow(QMainWindow):
                     padding: 2px;
                 """)
 
-            label = QLabel(f"Unit {i + 3}")
+            label = QLabel(f"Unit {i + 4}")
             label.setStyleSheet("font-size: 10px;" \
                             "font-family: Times New Roman;"
                             "font-weight: bold;"
@@ -148,7 +148,7 @@ class UnitWindow(QMainWindow):
                             "font-weight: bold;"
                             "color: white;"
                             )
-            text_input.setPlaceholderText(f"Slot for Unit {i + 1}")
+            text_input.setPlaceholderText(f"Slot for Unit {i + 4}")
 
             coordinates_label = QLabel("Unit Coordinates:")
             coordinates_label.setStyleSheet("font-size: 10px;" \

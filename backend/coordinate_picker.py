@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from pathlib import Path
 import win32api
-import autoit
+from . import coordinates_json
 
 class FindCoordinate():
     def __init__(self, mode: str, game_config: dict, logging: object, unit_window: object):
@@ -46,7 +46,9 @@ class FindCoordinate():
             self.unit_window[index]["x"].setText(str(x))
             self.unit_window[index]["y"].setText(str(y))
             print(f"Saved ({x}, {y}) to Unit {index + 1}")
-        
+            
+            coordinates_json.saveToJson(index, x, y)
+            self.logging.log_message(f"Saved as {x} and {y} to Unit {index + 1}")
         
 
     def mouseCallback(self, event, x, y, flags, param):
