@@ -20,6 +20,9 @@ class MainWindow(QMainWindow):
     
     '''We need params x, y, width and height for geometry so we only need the width and height to pass onto resMid for x and y'''
     def setupMain(self):
+        '''
+        This function initializes the application screen on what game to select.
+        '''
         window_width, window_height = initializers.qt.get("qt_default_resolution")
         window_x, window_y = windows_util.resolutionMid(window_width, window_height)
         self.setGeometry(window_x, window_y, window_width, window_height)
@@ -27,6 +30,9 @@ class MainWindow(QMainWindow):
         self.setStyleSheet("background-color: #1b1b1f;")
         
     def setupQt(self):
+        '''
+        This function makes it possible for us to have a window for the game selection.
+        '''
         self.layout = QVBoxLayout()
         self.layout.setSpacing(100)
         self.layout.setContentsMargins(0,0,0,0)
@@ -35,6 +41,9 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.main_widget)
         
     def initLabels(self):
+        '''
+        The purpose of this function is to initialize the application's name "Sect"
+        '''
         label = QLabel("Sect")
         label.setStyleSheet("font-size: 50px;" \
                             "font-family: Times New Roman;"
@@ -44,6 +53,12 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(label, alignment=Qt.AlignTop | Qt.AlignHCenter)
         
     def initButtons(self):
+        '''
+        The purpose of this function is to get each individual game configs by iterating through each of them,
+        then accessing their dictionaries by grabbing the value of each display name and freezing each value respective to their indices.
+        
+        Using partial, we are able to freeze each individual key-value pair so we are able to easily pick up each individual game that we want.
+        '''
         for game_config in initializers.game_configs.values():
             button = QPushButton(game_config["display_name"])
             button.setStyleSheet("font-size: 30px;" \
@@ -59,6 +74,12 @@ class MainWindow(QMainWindow):
 
 
     def chooseMode(self, game_config: dict):
+        '''
+        With the use of partial, this function gives the ability to choose the game mode within the dictionary of game_config.
+        game mode has its own dictionary which is why we need to display each individual button.
+        
+        This function also initiates the Logger window, Roblox Window, Debug window.
+        '''
         for i in reversed(range(self.layout.count())):
             item = self.layout.itemAt(i)
             if item.widget():

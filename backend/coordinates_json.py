@@ -13,7 +13,14 @@ coordinates = [
         }
     }
 ]
-def saveToJson(index, x, y):
+def saveToJson(index: int, x: int, y: int):
+    '''
+    params: index -> int, absolute x location -> int, absolute y location -> int
+    coordinate_picker.saveCoordinates gives index, x and y.
+    
+    This function will rewrite the file coordinates.json if there is a given location set.
+    The root of all of this is in unit_window.
+    '''
     try:
         if os.path.exists("coordinates.json"):
             with open("coordinates.json", "r") as file:
@@ -38,6 +45,9 @@ def saveToJson(index, x, y):
         print(f"Error JSON: {e}")
         
 def loadFromJson():
+    '''
+    This function will read the coordinates.json file and return a copy to use.
+    '''
     try:
         if os.path.exists("coordinates.json"):
             with open("coordinates.json", "r") as file:

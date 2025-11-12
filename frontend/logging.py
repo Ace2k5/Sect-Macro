@@ -23,6 +23,9 @@ class LoggerWindow(QMainWindow):
 
 
     def setupLogsPanel(self):
+        '''
+        Sets up a callable button that aims to show and hide the log window.
+        '''
         logs_panel = QWidget()
         layout_v = QVBoxLayout(logs_panel)
 
@@ -54,6 +57,9 @@ class LoggerWindow(QMainWindow):
         self.main_layout.addWidget(logs_panel)
 
     def setupDebugPanel(self):
+        '''
+        Sets up a callable button that aims to show and hide the debug window.
+        '''
         debug_panel = QWidget()
         layout_v = QVBoxLayout(debug_panel)
 

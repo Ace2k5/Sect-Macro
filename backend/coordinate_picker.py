@@ -10,6 +10,7 @@ class FindCoordinate():
         self.mode = mode
         self.logging = logging
         self.unit_window = unit_window.returnUnitButtons()
+        self.loadExistingCoordinates()
         self.coordinates = None
         self.folder_dir = Path(f"Images/{self.game_name}/{self.mode}/{self.mode}.png")
         if self.folder_dir.absolute():
@@ -26,6 +27,9 @@ class FindCoordinate():
         
 
     def getCoordinate(self):
+        '''
+        This function utilizes OpenCV's mouse callback to get the location of the left click input of a mouse.
+        '''
         picture = self.folder_dir
         picture_np = cv2.imread(str(picture))
         if picture_np is None:
@@ -39,6 +43,10 @@ class FindCoordinate():
         cv2.destroyAllWindows()
         
     def loadExistingCoordinates(self):
+        '''
+        This function will read the saved locations inside of coordinates.json and apply it to the
+        empty box inside of unit_window's QLineEdits.
+        '''
         data = coordinates_json.loadFromJson()
         if data and len(data) > 0 and "Unit" in data[0]:
             units = data[0]["Unit"]
@@ -50,6 +58,12 @@ class FindCoordinate():
                     unit_data["y"].setText(str(y))
     
     def saveCoordinate(self, index):
+        '''
+        params: index
+        Root is in unit_window. This function is possible due to the dot operator from PyQt (clicked.connect) and utilizing lambda
+        to catch the function call, freeze each individual buttons saved inside of unit_windows.returnUnitButton() and save those locations
+        inside of coordinates.json.
+        '''
         self.getCoordinate()
         if self.coordinates:
             x, y = self.coordinates

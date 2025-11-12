@@ -36,6 +36,10 @@ class DebugController(QObject):
     
     
     def devTools(self):
+        '''
+        This function initializes a vbox inside of the main layout of the application, giving us a separation between actual macro mechanics
+        and dev tools.
+        '''
         local_container = QWidget()
         local_container.setStyleSheet("border-color: #555555;"
                                       "border-width: 1px;"
@@ -59,6 +63,9 @@ class DebugController(QObject):
         
     
     def testButton(self):
+        '''
+        This button's purpose is to set up the connectivity between backend's template_matching and the frontend itself.
+        '''
         button = QPushButton("Test menu", self.main_widget)
         button.setStyleSheet("font-size: 30px;"
                              "font-family: Times New Roman;" 
